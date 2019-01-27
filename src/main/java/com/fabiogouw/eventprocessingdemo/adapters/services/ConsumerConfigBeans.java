@@ -1,6 +1,9 @@
 package com.fabiogouw.eventprocessingdemo.adapters.services;
 
 import com.fabiogouw.eventprocessingdemo.adapters.dtos.CustomEvent;
+import com.fabiogouw.eventprocessingdemo.adapters.handlers.EventHandler;
+import com.fabiogouw.eventprocessingdemo.adapters.handlers.WithdrawEventHandler;
+import com.fabiogouw.eventprocessingdemo.ports.DebitNotifier;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.TopicPartition;
@@ -15,6 +18,7 @@ import org.springframework.kafka.listener.*;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.apache.kafka.clients.consumer.Consumer;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,5 +73,10 @@ public class ConsumerConfigBeans {
             }
 
         };
+    }
+
+    @Bean
+    public List<EventHandler> getEventHandlers(DebitNotifier debitNotifier) {
+        return Arrays.asList(new WithdrawEventHandler(debitNotifier));
     }
 }
