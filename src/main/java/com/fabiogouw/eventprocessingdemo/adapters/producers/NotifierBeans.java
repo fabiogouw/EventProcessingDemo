@@ -1,7 +1,11 @@
 package com.fabiogouw.eventprocessingdemo.adapters.producers;
 
+import com.fabiogouw.eventprocessingdemo.adapters.dtos.Debit;
 import com.fabiogouw.eventprocessingdemo.adapters.dtos.Transfer;
 import com.fabiogouw.eventprocessingdemo.adapters.dtos.Withdraw;
+import com.fabiogouw.eventprocessingdemo.ports.DebitNotifier;
+import com.fabiogouw.eventprocessingdemo.ports.TransferNotifier;
+import com.fabiogouw.eventprocessingdemo.ports.WithdrawNotifier;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +41,14 @@ public class NotifierBeans {
         return template;
     }
 
+    @Bean
+    public KafkaTemplate<String, Debit> createDebirTemplate() {
+        Map<String, Object> senderProps = senderProps();
+        ProducerFactory<String, Debit> pf = new DefaultKafkaProducerFactory<>(senderProps);
+        KafkaTemplate<String, Debit> template = new KafkaTemplate<>(pf);
+        return template;
+    }
+
     private Map<String, Object> senderProps() {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
@@ -47,5 +59,20 @@ public class NotifierBeans {
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         return props;
+    }
+
+    @Bean
+    public DebitNotifier getDebitNotifier() {
+        return new DebitNotifierImpl();
+    }
+
+    @Bean
+    public TransferNotifier getTransferNotifier(KafkaTemplate<String, Transfer> kafkaTemplate) {
+        return new TransferNotifierImpl(kafkaTemplate);
+    }
+
+    @Bean
+    public WithdrawNotifier getWithdrawNotifier(KafkaTemplate<String, Withdraw> kafkaTemplate) {
+        return new WithdrawNotifierImpl(kafkaTemplate);
     }
 }

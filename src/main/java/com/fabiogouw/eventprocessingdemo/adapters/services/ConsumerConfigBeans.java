@@ -7,6 +7,7 @@ import com.fabiogouw.eventprocessingdemo.ports.DebitNotifier;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.TopicPartition;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -76,7 +77,8 @@ public class ConsumerConfigBeans {
     }
 
     @Bean
-    public List<EventHandler> getEventHandlers(DebitNotifier debitNotifier) {
-        return Arrays.asList(new WithdrawEventHandler(debitNotifier));
+    @Qualifier("Withdraw")
+    public EventHandler getWithdrawEventHandler(DebitNotifier debitNotifier) {
+        return new WithdrawEventHandler(debitNotifier);
     }
 }

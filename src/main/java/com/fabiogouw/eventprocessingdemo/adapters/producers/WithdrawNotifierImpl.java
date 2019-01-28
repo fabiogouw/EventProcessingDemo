@@ -1,9 +1,7 @@
 package com.fabiogouw.eventprocessingdemo.adapters.producers;
 
 import com.fabiogouw.eventprocessingdemo.adapters.dtos.CustomEvent;
-import com.fabiogouw.eventprocessingdemo.adapters.dtos.Transfer;
 import com.fabiogouw.eventprocessingdemo.adapters.dtos.Withdraw;
-import com.fabiogouw.eventprocessingdemo.ports.TransferNotifier;
 import com.fabiogouw.eventprocessingdemo.ports.WithdrawNotifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,9 +9,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.stereotype.Service;
 
-@Service
 public class WithdrawNotifierImpl implements WithdrawNotifier {
 
     private static final Logger _logger = LoggerFactory.getLogger(WithdrawNotifierImpl.class);

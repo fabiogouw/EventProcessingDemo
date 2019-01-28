@@ -9,9 +9,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.stereotype.Service;
 
-@Service
 public class TransferNotifierImpl implements TransferNotifier {
 
     private static final Logger _logger = LoggerFactory.getLogger(TransferNotifierImpl.class);

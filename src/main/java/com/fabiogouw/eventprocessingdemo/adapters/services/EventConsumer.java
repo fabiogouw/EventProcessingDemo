@@ -10,7 +10,6 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class EventConsumer {
@@ -30,7 +29,7 @@ public class EventConsumer {
         boolean processed = false;
         for(EventHandler eventHandler : _handlers) {
             if(eventHandler.getType().equals(event.getType())) {
-                processed |= eventHandler.handle(event);
+                processed = processed || eventHandler.handle(event);
                 break;
             }
         }
