@@ -25,14 +25,12 @@ public class WithdrawEventHandler implements EventHandler {
     }
 
     @Override
-    public Boolean handle(CustomEvent event) {
+    public void handle(CustomEvent event) {
         ObjectMapper mapper = new ObjectMapper();
         Withdraw withdraw = mapper.convertValue(event.getPayload(), Withdraw.class);
         if(withdraw != null) {
             _logger.info("Processando um saque e incluindo um novo débito...");
             _debitNotifier.notifyDebit(new Debit(UUID.randomUUID(), withdraw.getId(), withdraw.getAccountFrom(), withdraw.getAmount()));
-            return true;
         }
-        return false;
     }
 }

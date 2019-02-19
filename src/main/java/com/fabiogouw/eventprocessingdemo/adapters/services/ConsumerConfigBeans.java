@@ -19,7 +19,6 @@ import org.springframework.kafka.listener.*;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.apache.kafka.clients.consumer.Consumer;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

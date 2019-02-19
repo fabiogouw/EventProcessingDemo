@@ -24,12 +24,13 @@ public class EventConsumer {
 
     @KafkaListener(topics = {"transfers", "withdraws"}, groupId = "group_id", containerFactory = "containerFactory")
     public void consume(ConsumerRecord<String, CustomEvent> message, Acknowledgment acknowledgment) {
-        _logger.info(String.format("#### -> Consumed message -> %s", message));
+        _logger.info("#### -> Consumed message -> '{}' : '{}' / '{}'", message.topic(),  message.partition(), message.offset());
         CustomEvent event = message.value();
         boolean processed = false;
         for(EventHandler eventHandler : _handlers) {
             if(eventHandler.getType().equals(event.getType())) {
-                processed = processed || eventHandler.handle(event);
+                processed = true;
+                eventHandler.handle(event);
                 break;
             }
         }
