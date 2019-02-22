@@ -4,6 +4,7 @@ import com.fabiogouw.eventprocessingdemo.adapters.dtos.CustomEvent;
 import com.fabiogouw.eventprocessingdemo.adapters.dtos.Debit;
 import com.fabiogouw.eventprocessingdemo.adapters.dtos.Withdraw;
 import com.fabiogouw.eventprocessingdemo.ports.DebitNotifier;
+import com.fabiogouw.eventprocessingdemo.ports.EventHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

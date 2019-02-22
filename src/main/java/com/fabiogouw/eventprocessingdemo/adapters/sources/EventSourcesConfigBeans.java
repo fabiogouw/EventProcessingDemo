@@ -1,9 +1,10 @@
-package com.fabiogouw.eventprocessingdemo.adapters.services;
+package com.fabiogouw.eventprocessingdemo.adapters.sources;
 
 import com.fabiogouw.eventprocessingdemo.adapters.dtos.CustomEvent;
-import com.fabiogouw.eventprocessingdemo.adapters.handlers.EventHandler;
+import com.fabiogouw.eventprocessingdemo.ports.EventHandler;
 import com.fabiogouw.eventprocessingdemo.adapters.handlers.WithdrawEventHandler;
 import com.fabiogouw.eventprocessingdemo.ports.DebitNotifier;
+import com.fabiogouw.eventprocessingdemo.ports.EventSource;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.TopicPartition;
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.*;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
@@ -25,7 +27,7 @@ import java.util.Map;
 
 @EnableKafka
 @Configuration
-public class ConsumerConfigBeans {
+public class EventSourcesConfigBeans {
 
     @Value(value = "${spring.kafka.consumer.bootstrap-servers}")
     private String bootstrapAddress;
@@ -45,6 +47,7 @@ public class ConsumerConfigBeans {
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
         ConcurrentKafkaListenerContainerFactory<String, CustomEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setAutoStartup(false);
         factory.setConsumerFactory(new DefaultKafkaConsumerFactory<>(props));
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         factory.getContainerProperties().setSyncCommits(true);
@@ -79,5 +82,10 @@ public class ConsumerConfigBeans {
     @Qualifier("Withdraw")
     public EventHandler getWithdrawEventHandler(DebitNotifier debitNotifier) {
         return new WithdrawEventHandler(debitNotifier);
+    }
+
+    @Bean
+    public EventSource getWithdrawEventSource(KafkaListenerEndpointRegistry registry) {
+        return new WithdrawEventSource(registry);
     }
 }

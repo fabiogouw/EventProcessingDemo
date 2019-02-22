@@ -1,4 +1,4 @@
-package com.fabiogouw.eventprocessingdemo.adapters.handlers;
+package com.fabiogouw.eventprocessingdemo.ports;
 
 import com.fabiogouw.eventprocessingdemo.adapters.dtos.CustomEvent;
 

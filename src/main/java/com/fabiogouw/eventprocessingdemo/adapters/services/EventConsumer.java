@@ -1,14 +1,13 @@
 package com.fabiogouw.eventprocessingdemo.adapters.services;
 
 import com.fabiogouw.eventprocessingdemo.adapters.dtos.CustomEvent;
-import com.fabiogouw.eventprocessingdemo.adapters.handlers.EventHandler;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
+import com.fabiogouw.eventprocessingdemo.ports.EventHandler;
+import com.fabiogouw.eventprocessingdemo.ports.EventSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 
 @Service
@@ -17,15 +16,21 @@ public class EventConsumer {
     private final Logger _logger = LoggerFactory.getLogger(EventConsumer.class);
 
     private final List<EventHandler> _handlers;
+    private final List<EventSource> _sources;
 
-    public EventConsumer(List<EventHandler> handlers) {
+    public EventConsumer(List<EventHandler> handlers, List<EventSource> sources) {
         _handlers = handlers;
+        _sources = sources;
     }
 
-    @KafkaListener(topics = {"transfers", "withdraws"}, groupId = "group_id", containerFactory = "containerFactory")
-    public void consume(ConsumerRecord<String, CustomEvent> message, Acknowledgment acknowledgment) {
-        _logger.info("#### -> Consumed message -> '{}' : '{}' / '{}'", message.topic(),  message.partition(), message.offset());
-        CustomEvent event = message.value();
+    @PostConstruct
+    public void initIt() throws Exception {
+        for (EventSource source : _sources) {
+            source.setProcessor(this::consume);
+        }
+    }
+
+    public void consume(CustomEvent event) {
         boolean processed = false;
         for(EventHandler eventHandler : _handlers) {
             if(eventHandler.getType().equals(event.getType())) {
@@ -37,6 +42,5 @@ public class EventConsumer {
         if(!processed) {
             _logger.warn(String.format("Evento '%s' ignorado pois nenhum handler o atende...", event.getType()));
         }
-        acknowledgment.acknowledge();
     }
 }
