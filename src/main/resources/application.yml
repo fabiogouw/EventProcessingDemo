@@ -10,3 +10,8 @@ spring:
       bootstrap-servers: 172.19.0.3:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

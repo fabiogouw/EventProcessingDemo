@@ -25,6 +25,10 @@ public class CustomEvent {
         return _version;
     }
 
+    public void setVersion(int value) {
+        _version = value;
+    }
+
     public CustomEvent() {
 
     }

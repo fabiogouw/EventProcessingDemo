@@ -5,6 +5,11 @@ import com.fabiogouw.eventprocessingdemo.ports.EventHandler;
 import com.fabiogouw.eventprocessingdemo.adapters.handlers.WithdrawEventHandler;
 import com.fabiogouw.eventprocessingdemo.ports.DebitNotifier;
 import com.fabiogouw.eventprocessingdemo.ports.EventSource;
+import io.micrometer.core.instrument.LongTaskTimer;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.TopicPartition;
@@ -64,5 +69,15 @@ public class EventSourcesConfigBeans {
     @Bean
     public EventSource getWithdrawEventSource(KafkaListenerEndpointRegistry registry) {
         return new WithdrawEventSource(registry);
+    }
+
+    @Bean
+    public Timer getTimer() {
+        MeterRegistry registry = new SimpleMeterRegistry();
+        Metrics.addRegistry(registry);
+        //return Metrics.timer("app.eventsProcessed");
+
+        Timer timer = Timer.builder("app.eventsProcessed").tag("method", "manual").register(registry);
+        return timer;
     }
 }
