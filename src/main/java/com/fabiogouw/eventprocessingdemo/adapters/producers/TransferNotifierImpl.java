@@ -24,7 +24,7 @@ public class TransferNotifierImpl implements TransferNotifier {
     @Override
     public void notifyTransfer(Transfer transfer) {
         Message<CustomEvent> message = MessageBuilder
-                .withPayload(new CustomEvent("com.fabiogouw.eventprocessingdemo.TransferRequested", transfer))
+                .withPayload(new CustomEvent("com.fabiogouw.eventprocessingdemo.TransferRequested", 1, transfer))
                 .setHeader(KafkaHeaders.TOPIC, TOPIC)
                 .setHeader(KafkaHeaders.MESSAGE_KEY, transfer.getId().toString())
                 .setHeader("event_type", "com.fabiogouw.eventprocessingdemo.TransferRequested")

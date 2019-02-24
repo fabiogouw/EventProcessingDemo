@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 
 @Service
@@ -21,19 +20,17 @@ public class EventConsumer {
     public EventConsumer(List<EventHandler> handlers, List<EventSource> sources) {
         _handlers = handlers;
         _sources = sources;
-    }
-
-    @PostConstruct
-    public void initIt() throws Exception {
         for (EventSource source : _sources) {
-            source.setProcessor(this::consume);
+            source.subscribe(this::consume);
         }
     }
 
     public void consume(CustomEvent event) {
         boolean processed = false;
         for(EventHandler eventHandler : _handlers) {
-            if(eventHandler.getType().equals(event.getType())) {
+            if(eventHandler.getType().equals(event.getType())
+                && eventHandler.getLowestVersion() >= event.getVersion()
+                && eventHandler.getHighestVersion() <= event.getVersion()) {
                 processed = true;
                 eventHandler.handle(event);
                 break;

@@ -1,7 +1,6 @@
 package com.fabiogouw.eventprocessingdemo.adapters.sources;
 
 import com.fabiogouw.eventprocessingdemo.adapters.dtos.CustomEvent;
-import com.fabiogouw.eventprocessingdemo.adapters.services.EventConsumer;
 import com.fabiogouw.eventprocessingdemo.ports.EventSource;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -11,6 +10,9 @@ import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.kafka.support.Acknowledgment;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class WithdrawEventSource implements EventSource {
@@ -33,8 +35,19 @@ public class WithdrawEventSource implements EventSource {
     }
 
     @Override
-    public void setProcessor(Consumer<CustomEvent> run) {
+    public void subscribe(Consumer<CustomEvent> run) {
         _run = run;
-        _registry.getListenerContainer(LISTENER_ID).start();
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        Runnable task = new Runnable() {
+            public void run() {
+                MessageListenerContainer container =_registry.getListenerContainer(LISTENER_ID);
+                if(container != null) {
+                    container.start();
+                    _logger.info("Kafka subscription started...");
+                    scheduler.shutdown();
+                }
+            }
+        };
+        scheduler.scheduleAtFixedRate(task, 100, 100, TimeUnit.MILLISECONDS);
     }
 }

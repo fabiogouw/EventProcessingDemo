@@ -26,6 +26,16 @@ public class WithdrawEventHandler implements EventHandler {
     }
 
     @Override
+    public int getLowestVersion() {
+        return 1;
+    }
+
+    @Override
+    public int getHighestVersion() {
+        return 1;
+    }
+
+    @Override
     public void handle(CustomEvent event) {
         ObjectMapper mapper = new ObjectMapper();
         Withdraw withdraw = mapper.convertValue(event.getPayload(), Withdraw.class);
