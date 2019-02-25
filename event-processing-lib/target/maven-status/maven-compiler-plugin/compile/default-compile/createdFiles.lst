@@ -1,0 +1,3 @@
+com/fabiogouw/eventprocessinglib/ports/EventSource.class
+com/fabiogouw/eventprocessinglib/dtos/CustomEvent.class
+com/fabiogouw/eventprocessinglib/ports/EventHandler.class
