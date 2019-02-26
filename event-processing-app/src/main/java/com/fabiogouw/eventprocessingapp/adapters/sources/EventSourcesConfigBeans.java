@@ -63,6 +63,7 @@ public class EventSourcesConfigBeans {
     }
 
     @Bean
+    @Qualifier("Withdraw")
     public EventSource getWithdrawEventSource(KafkaListenerEndpointRegistry registry) {
         return new WithdrawEventSource(registry);
     }
