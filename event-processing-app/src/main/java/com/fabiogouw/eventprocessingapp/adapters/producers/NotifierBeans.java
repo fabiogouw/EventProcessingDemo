@@ -1,11 +1,7 @@
 package com.fabiogouw.eventprocessingapp.adapters.producers;
 
-import com.fabiogouw.eventprocessingapp.adapters.dtos.Debit;
-import com.fabiogouw.eventprocessingapp.adapters.dtos.Transfer;
-import com.fabiogouw.eventprocessingapp.adapters.dtos.Withdraw;
-import com.fabiogouw.eventprocessingapp.ports.DebitNotifier;
-import com.fabiogouw.eventprocessingapp.ports.TransferNotifier;
-import com.fabiogouw.eventprocessingapp.ports.WithdrawNotifier;
+import com.fabiogouw.eventprocessingapp.adapters.dtos.*;
+import com.fabiogouw.eventprocessingapp.ports.*;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +11,7 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -74,5 +71,15 @@ public class NotifierBeans {
     @Bean
     public WithdrawNotifier getWithdrawNotifier(KafkaTemplate<String, Withdraw> kafkaTemplate) {
         return new WithdrawNotifierImpl(kafkaTemplate);
+    }
+
+    @Bean
+    public FraudAnalysisNotifier getFraudAnalysisNotifier(KafkaTemplate<String, FraudAnalysisResult> kafkaTemplate) {
+        return new FraudAnalysisNotifierImpl(kafkaTemplate);
+    }
+
+    @Bean
+    public LimitAnalysisNotifier getLimitAnalysisNotifier(KafkaTemplate<String, LimitAnalysisResult> kafkaTemplate) {
+        return new LimitAnalysisNotifierImpl(kafkaTemplate);
     }
 }

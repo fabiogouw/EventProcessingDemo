@@ -30,9 +30,11 @@ public class RedisJoinerStateRepository implements JoinerStateRepository {
 
     @Override
     public void save(Join join, int partition, long offset) {
+        String key = JOIN_PREFIX + join.getId();
         for(String state : join.getStates()) {
-            _jedis.sadd(JOIN_PREFIX + join.getId(), state);
+            _jedis.sadd(key, state);
         }
+        _jedis.expire(key, 60);
         // last thing to do is to update the partition's offset, don't care
         // if the last instructions will get repeated eventually
         _jedis.set(PARTITION_PREFIX + partition, String.valueOf(offset));

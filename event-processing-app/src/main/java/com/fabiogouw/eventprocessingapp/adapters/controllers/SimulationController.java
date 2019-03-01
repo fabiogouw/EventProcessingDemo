@@ -1,8 +1,5 @@
 package com.fabiogouw.eventprocessingapp.adapters.controllers;
 
-import com.fabiogouw.adapters.KafkaRewindableEventSource;
-import com.fabiogouw.adapters.RedisJoinerStateRepository;
-import com.fabiogouw.domain.Joiner;
 import com.fabiogouw.eventprocessingapp.adapters.dtos.Transfer;
 import com.fabiogouw.eventprocessingapp.adapters.dtos.Withdraw;
 import com.fabiogouw.eventprocessingapp.ports.TransferNotifier;
@@ -15,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
 import java.util.UUID;
 
 @RestController
@@ -39,13 +35,5 @@ public class SimulationController {
             _transferNotifier.notifyTransfer(new Transfer(UUID.randomUUID(), "AAA", "BBB", 10));
             _withdrawNotifier.notifyWithdraw(new Withdraw(UUID.randomUUID(), "CCC", 20));
         }
-    }
-
-    @PostMapping(value = "/test_join")
-    public void sendMessageToKafkaTopic() {
-        Joiner joiner = new Joiner(new RedisJoinerStateRepository(), new KafkaRewindableEventSource());
-        joiner.setBehavior(Arrays.asList("Able", "Baker", "Baker"), (id) -> {
-            _logger.info("Join completed for '{}'.", id);
-        });
     }
 }
