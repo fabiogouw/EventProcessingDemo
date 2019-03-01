@@ -1,8 +1,6 @@
 package com.fabiogouw.eventprocessingapp.adapters.controllers;
 
-import com.fabiogouw.eventprocessingapp.adapters.dtos.Transfer;
 import com.fabiogouw.eventprocessingapp.adapters.dtos.Withdraw;
-import com.fabiogouw.eventprocessingapp.ports.TransferNotifier;
 import com.fabiogouw.eventprocessingapp.ports.WithdrawNotifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,19 +18,16 @@ public class SimulationController {
 
     private final Logger _logger = LoggerFactory.getLogger(SimulationController.class);
 
-    private final TransferNotifier _transferNotifier;
     private final WithdrawNotifier _withdrawNotifier;
 
     @Autowired
-    SimulationController(TransferNotifier transferNotifier, WithdrawNotifier withdrawNotifier) {
-        _transferNotifier = transferNotifier;
+    SimulationController(WithdrawNotifier withdrawNotifier) {
         _withdrawNotifier = withdrawNotifier;
     }
 
     @PostMapping(value = "/test")
     public void sendMessageToKafkaTopic(@RequestParam("count") int count) {
         for(int i = 0; i < count; i++) {
-            _transferNotifier.notifyTransfer(new Transfer(UUID.randomUUID(), "AAA", "BBB", 10));
             _withdrawNotifier.notifyWithdraw(new Withdraw(UUID.randomUUID(), "CCC", 20));
         }
     }

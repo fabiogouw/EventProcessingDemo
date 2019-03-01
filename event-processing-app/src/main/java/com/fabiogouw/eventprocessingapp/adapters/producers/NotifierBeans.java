@@ -31,10 +31,18 @@ public class NotifierBeans {
     }
 
     @Bean
-    public KafkaTemplate<String, Transfer> createTransferTemplate() {
+    public KafkaTemplate<String, FraudAnalysisResult> createWithdrawFraudAnalysisTemplate() {
         Map<String, Object> senderProps = senderProps();
-        ProducerFactory<String, Transfer> pf = new DefaultKafkaProducerFactory<>(senderProps);
-        KafkaTemplate<String, Transfer> template = new KafkaTemplate<>(pf);
+        ProducerFactory<String, FraudAnalysisResult> pf = new DefaultKafkaProducerFactory<>(senderProps);
+        KafkaTemplate<String, FraudAnalysisResult> template = new KafkaTemplate<>(pf);
+        return template;
+    }
+
+    @Bean
+    public KafkaTemplate<String, LimitAnalysisResult> createWithdrawLimitAnalysisTemplate() {
+        Map<String, Object> senderProps = senderProps();
+        ProducerFactory<String, LimitAnalysisResult> pf = new DefaultKafkaProducerFactory<>(senderProps);
+        KafkaTemplate<String, LimitAnalysisResult> template = new KafkaTemplate<>(pf);
         return template;
     }
 
@@ -61,11 +69,6 @@ public class NotifierBeans {
     @Bean
     public DebitNotifier getDebitNotifier() {
         return new DebitNotifierImpl();
-    }
-
-    @Bean
-    public TransferNotifier getTransferNotifier(KafkaTemplate<String, Transfer> kafkaTemplate) {
-        return new TransferNotifierImpl(kafkaTemplate);
     }
 
     @Bean

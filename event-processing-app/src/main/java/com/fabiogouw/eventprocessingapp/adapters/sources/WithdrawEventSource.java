@@ -26,7 +26,7 @@ public class WithdrawEventSource implements EventSource {
         _registry = registry;
     }
 
-    @KafkaListener(id = LISTENER_ID, topics = {"transfers", "withdraws"}, containerFactory = "containerFactory")
+    @KafkaListener(id = LISTENER_ID, topics = {"withdraws"}, containerFactory = "containerFactory")
     public void listen(ConsumerRecord<String, CustomEvent> message, Acknowledgment acknowledgment) {
         _logger.info("#### -> Consumed message -> '{}' : '{}' / '{}'", message.topic(),  message.partition(), message.offset());
         CustomEvent event = message.value();

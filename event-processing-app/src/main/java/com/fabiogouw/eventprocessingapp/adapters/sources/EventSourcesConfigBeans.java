@@ -1,11 +1,13 @@
 package com.fabiogouw.eventprocessingapp.adapters.sources;
 
-import com.fabiogouw.eventprocessingapp.adapters.handlers.WithdrawEventHandler;
+import com.fabiogouw.eventprocessingapp.adapters.handlers.WithdrawFraudAnalysisEventHandler;
+import com.fabiogouw.eventprocessingapp.adapters.handlers.WithdrawLimitAnalysisEventHandler;
 import com.fabiogouw.eventprocessingapp.ports.DebitNotifier;
 import com.fabiogouw.eventprocessinglib.adapters.services.IgnoreMessageErrorHandler;
 import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
 import com.fabiogouw.eventprocessinglib.ports.EventHandler;
 import com.fabiogouw.eventprocessinglib.ports.EventSource;
+import com.fabiogouw.ports.JoinNotifier;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
@@ -57,9 +59,15 @@ public class EventSourcesConfigBeans {
     }
 
     @Bean
-    @Qualifier("Withdraw")
-    public EventHandler getWithdrawEventHandler(DebitNotifier debitNotifier) {
-        return new WithdrawEventHandler(debitNotifier);
+    @Qualifier("WithdrawFraudAnalysis")
+    public EventHandler getWithdrawFraudAnalysisEventHandler(JoinNotifier joinNotifier) {
+        return new WithdrawFraudAnalysisEventHandler(joinNotifier);
+    }
+
+    @Bean
+    @Qualifier("WithdrawLimitAnalysis")
+    public EventHandler getWithdrawLimitAnalysisEventHandler(JoinNotifier joinNotifier) {
+        return new WithdrawLimitAnalysisEventHandler(joinNotifier);
     }
 
     @Bean

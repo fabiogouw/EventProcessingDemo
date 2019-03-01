@@ -33,7 +33,6 @@ public class EventConsumerImpl implements EventConsumer {
                         && eventHandler.getHighestVersion() <= event.getVersion()) {
                     processed = true;
                     eventHandler.handle(event);
-                    break;
                 }
             }
             if(!processed) {

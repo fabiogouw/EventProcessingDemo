@@ -63,7 +63,10 @@ public class KafkaRewindableEventSource implements RewindableEventSource {
                     long offset = -1;
                     List<ConsumerRecord<String, State>> recordsPerPartition = consumerRecords.records(partition);
                     for(ConsumerRecord<String, State> record : recordsPerPartition) {
-                        _run.accept(record.value());
+                        State state = record.value();
+                        state.setOffset(record.offset());
+                        state.setPartition(record.partition());
+                        _run.accept(state);
                         long currentOffset = _offsets.getOrDefault(record.partition(), -1l);
                         if(currentOffset != -1 && currentOffset < record.offset()) {
                             _consumer.seek(partition, currentOffset);
