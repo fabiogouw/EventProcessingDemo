@@ -15,3 +15,7 @@ management:
     web:
       exposure:
         include: "*"
+logging:
+  level:
+    com:
+      fabiogouw: DEBUG

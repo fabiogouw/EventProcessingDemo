@@ -3,6 +3,8 @@ package com.fabiogouw.domain;
 import com.fabiogouw.ports.Joiner;
 import com.fabiogouw.ports.JoinerStateRepository;
 import com.fabiogouw.ports.RewindableEventSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
@@ -15,6 +17,8 @@ public class JoinerImpl implements Joiner {
     private final JoinerStateRepository _repository;
     private final RewindableEventSource _eventSource;
     private Predicate<Set<String>> _checkJoin;
+
+    private final Logger _logger = LoggerFactory.getLogger(JoinerImpl.class);
 
     public JoinerImpl(JoinerStateRepository repository, RewindableEventSource eventSource) {
         _repository = repository;
@@ -35,19 +39,28 @@ public class JoinerImpl implements Joiner {
 
     private void addState(State state) {
         long currentStateOffset = _repository.getOffsetForPartition(state.getPartition());
-        if(currentStateOffset + 1 == state.getOffset()) {
-            Join join = _repository.get(state.getId());
-            join.addState(state.getValue());
-            boolean shouldComplete = _checkJoin.test(join.getStates());
-            if(shouldComplete) {
-                _onCompletion.accept(join.getId());
-            }
-            _repository.save(join, state.getPartition(), state.getOffset());
+        if(currentStateOffset < state.getOffset() - 1) {
+            long offsetToGo = currentStateOffset < 0 ? -1 : currentStateOffset;
+            _eventSource.rewindTo(state.getPartition(), offsetToGo);
         }
         else {
-            if(currentStateOffset < state.getOffset()) {
-                _eventSource.rewindTo(state.getPartition(), state.getOffset() - 1);
+            Join join = _repository.get(state.getId());
+            join.addState(state.getValue());
+            if(currentStateOffset + 1 == state.getOffset()) {
+                boolean shouldComplete = _checkJoin.test(join.getStates());
+                if(shouldComplete) {
+                    try {
+                        _onCompletion.accept(join.getId());
+                    }
+                    catch(Exception ex) {
+                        _logger.error("Error while processing partition {}, offset {}. Details: {}", state.getPartition(), state.getOffset(), ex);
+                    }
+                }
             }
+            if(currentStateOffset < state.getOffset()) {
+                _repository.save(join, state.getPartition(), state.getOffset());
+            }
+            _eventSource.setProcessedOffset(state.getPartition(), state.getOffset());
         }
     }
 

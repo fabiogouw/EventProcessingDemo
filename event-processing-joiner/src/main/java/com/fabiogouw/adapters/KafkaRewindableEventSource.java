@@ -10,10 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -41,9 +38,14 @@ public class KafkaRewindableEventSource implements RewindableEventSource {
     }
 
     @Override
+    public void setProcessedOffset(int partition, long offset) {
+        _offsets.put(partition, offset);
+    }
+
+    @Override
     public void rewindTo(int partition, long offset) {
-        _logger.info("KafkaRewindableEventSource rewind to {}.", offset);
-        _offsets.replace(partition, offset);
+        _logger.info("KafkaRewindableEventSource - Partition {} marked to rewind to {}.", partition,  offset);
+        _offsets.put(partition, offset);
     }
 
     @Override
@@ -60,25 +62,11 @@ public class KafkaRewindableEventSource implements RewindableEventSource {
                 ConsumerRecords<String, State> consumerRecords = _consumer.poll(Duration.ofMillis(500));
                 Set<TopicPartition> partitions = consumerRecords.partitions();
                 for(TopicPartition partition : partitions) {
-                    long offset = -1;
+                    _offsets.put(partition.partition(), _consumer.position(partition));
                     List<ConsumerRecord<String, State>> recordsPerPartition = consumerRecords.records(partition);
-                    for(ConsumerRecord<String, State> record : recordsPerPartition) {
-                        State state = record.value();
-                        state.setOffset(record.offset());
-                        state.setPartition(record.partition());
-                        _run.accept(state);
-                        long currentOffset = _offsets.getOrDefault(record.partition(), -1l);
-                        if(currentOffset != -1 && currentOffset < record.offset()) {
-                            _consumer.seek(partition, currentOffset);
-                            offset = -1;
-                            break;
-                        }
-                        else {
-                            _offsets.replace(record.partition(), -1l);
-                            offset = record.offset();
-                        }
-                    }
-                    if(offset > -1) {
+                    long offset = processPartition(recordsPerPartition, partition);
+                    if(offset >= 0) {
+                        _logger.debug("Marking partition {} offset {} to commit.", partition.partition(), offset);
                         commitMap.put(partition, new OffsetAndMetadata(offset));
                     }
                 }
@@ -89,5 +77,31 @@ public class KafkaRewindableEventSource implements RewindableEventSource {
             _consumer.close();
             _logger.info("KafkaRewindableEventSource closed.");
         }
+    }
+
+    private long processPartition(List<ConsumerRecord<String, State>> records, TopicPartition partition) {
+        long offset = -1;
+        for(ConsumerRecord<String, State> record : records) {
+            State state = record.value();
+            state.setOffset(record.offset());
+            state.setPartition(record.partition());
+            _logger.debug("Processing state partition: {} offset: {}...", state.getPartition(),  state.getOffset());
+            _run.accept(state);
+            long currentOffset = _offsets.getOrDefault(record.partition(), -1l);
+            if(currentOffset < record.offset()) {
+                if(currentOffset < 0) {
+                    _consumer.seekToBeginning(Arrays.asList(partition));
+                }
+                else {
+                    _consumer.seek(partition, currentOffset);
+                }
+                _logger.info("KafkaRewindableEventSource - Partition {} rewinded to {}.", partition,  currentOffset);
+                break;
+            }
+            else {
+                offset = record.offset();
+            }
+        }
+        return offset;
     }
 }

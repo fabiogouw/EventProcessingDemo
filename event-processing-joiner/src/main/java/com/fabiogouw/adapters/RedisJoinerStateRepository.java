@@ -2,11 +2,15 @@ package com.fabiogouw.adapters;
 
 import com.fabiogouw.domain.Join;
 import com.fabiogouw.ports.JoinerStateRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 
 import java.util.Set;
 
 public class RedisJoinerStateRepository implements JoinerStateRepository {
+
+    private final Logger _logger = LoggerFactory.getLogger(RedisJoinerStateRepository.class);
 
     private static String PARTITION_PREFIX = "__PJOIN_";
     private static String JOIN_PREFIX = "__JOIN_";
@@ -14,11 +18,13 @@ public class RedisJoinerStateRepository implements JoinerStateRepository {
 
     @Override
     public long getOffsetForPartition(int partition) {
+        long currentOffset = -1;
         String value =_jedis.get(PARTITION_PREFIX + partition);
         if(value != null && !value.isEmpty()) {
-            return Integer.parseInt(value);
+            currentOffset = Integer.parseInt(value);
         }
-        return -1;
+        _logger.debug("Getting offset info for partition {}: {}.", partition, currentOffset);
+        return currentOffset;
     }
 
     @Override
@@ -37,6 +43,7 @@ public class RedisJoinerStateRepository implements JoinerStateRepository {
         _jedis.expire(key, 60);
         // last thing to do is to update the partition's offset, don't care
         // if the last instructions will get repeated eventually
+        _logger.debug("Setting offset info for partition {}: {}.", partition, offset);
         _jedis.set(PARTITION_PREFIX + partition, String.valueOf(offset));
     }
 }
