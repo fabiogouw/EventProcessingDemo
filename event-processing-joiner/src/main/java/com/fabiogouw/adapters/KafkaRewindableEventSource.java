@@ -20,7 +20,7 @@ public class KafkaRewindableEventSource implements RewindableEventSource {
     private final Logger _logger = LoggerFactory.getLogger(KafkaRewindableEventSource.class);
     private org.apache.kafka.clients.consumer.Consumer<String, State> _consumer;
     private volatile boolean _running = false;
-    private volatile Map<Integer, Long> _offsets = new HashMap<>();
+    private final Map<Integer, KafkaRewindablePartitionProcessor> _partitionProcessers = new HashMap<>();
     private Consumer<State> _run;
 
     public KafkaRewindableEventSource(org.apache.kafka.clients.consumer.Consumer<String, State> consumer) {
@@ -39,13 +39,13 @@ public class KafkaRewindableEventSource implements RewindableEventSource {
 
     @Override
     public void setProcessedOffset(int partition, long offset) {
-        _offsets.put(partition, offset);
+        _partitionProcessers.get(partition).setCurrentOffset(offset);
     }
 
     @Override
-    public void rewindTo(int partition, long offset) {
-        _logger.info("KafkaRewindableEventSource - Partition {} marked to rewind to {}.", partition,  offset);
-        _offsets.put(partition, offset);
+    public void rewindTo(int partition, long offsetToGo, long triggerOffset) {
+        _logger.info("KafkaRewindableEventSource - Partition {} marked to rewind to {}, triggered by {}.", partition,  offsetToGo, triggerOffset);
+        _partitionProcessers.get(partition).markOffsetToRewind(offsetToGo, triggerOffset);
     }
 
     @Override
@@ -57,51 +57,40 @@ public class KafkaRewindableEventSource implements RewindableEventSource {
     private void consume() {
         try {
             _logger.info("KafkaRewindableEventSource is starting to consume...");
+            Map<TopicPartition, OffsetAndMetadata> commitMap = new HashMap<>();
             while(_running) {
-                Map<TopicPartition, OffsetAndMetadata> commitMap = new HashMap<>();
                 ConsumerRecords<String, State> consumerRecords = _consumer.poll(Duration.ofMillis(500));
-                Set<TopicPartition> partitions = consumerRecords.partitions();
-                for(TopicPartition partition : partitions) {
-                    _offsets.put(partition.partition(), _consumer.position(partition));
-                    List<ConsumerRecord<String, State>> recordsPerPartition = consumerRecords.records(partition);
-                    long offset = processPartition(recordsPerPartition, partition);
-                    if(offset >= 0) {
-                        _logger.debug("Marking partition {} offset {} to commit.", partition.partition(), offset);
-                        commitMap.put(partition, new OffsetAndMetadata(offset));
+                Set<KafkaRewindablePartitionProcessor> partitionProcessors = getPartitionProcessors(consumerRecords.partitions());
+                for(KafkaRewindablePartitionProcessor partitionProcessor : partitionProcessors) {
+                    List<ConsumerRecord<String, State>> recordsPerPartition = consumerRecords.records(partitionProcessor.getTopicPartition());
+                    if(recordsPerPartition.size() > 0) {
+                        partitionProcessor.setConsumerPosition();
+                        boolean shouldCommit = partitionProcessor.processRecords(recordsPerPartition);
+                        if(shouldCommit) {
+                            _logger.debug("Marking partition {} to commit at offset {}...", partitionProcessor.getTopicPartition(), partitionProcessor.getCurrentOffset());
+                            commitMap.put(partitionProcessor.getTopicPartition(), new OffsetAndMetadata(partitionProcessor.getCurrentOffset()));
+                        }
                     }
                 }
-                _consumer.commitSync(commitMap);
+                if(commitMap.size() > 0) {
+                    _consumer.commitSync(commitMap);
+                    commitMap.clear();
+                }
             }
         }
         finally {
             _consumer.close();
+            _partitionProcessers.clear();
             _logger.info("KafkaRewindableEventSource closed.");
         }
     }
 
-    private long processPartition(List<ConsumerRecord<String, State>> records, TopicPartition partition) {
-        long offset = -1;
-        for(ConsumerRecord<String, State> record : records) {
-            State state = record.value();
-            state.setOffset(record.offset());
-            state.setPartition(record.partition());
-            _logger.debug("Processing state partition: {} offset: {}...", state.getPartition(),  state.getOffset());
-            _run.accept(state);
-            long currentOffset = _offsets.getOrDefault(record.partition(), -1l);
-            if(currentOffset < record.offset()) {
-                if(currentOffset < 0) {
-                    _consumer.seekToBeginning(Arrays.asList(partition));
-                }
-                else {
-                    _consumer.seek(partition, currentOffset);
-                }
-                _logger.info("KafkaRewindableEventSource - Partition {} rewinded to {}.", partition,  currentOffset);
-                break;
-            }
-            else {
-                offset = record.offset();
+    private Set<KafkaRewindablePartitionProcessor> getPartitionProcessors(Set<TopicPartition> partitions) {
+        for(TopicPartition partition : partitions) {
+            if(!_partitionProcessers.containsKey(partition.partition())) {
+                _partitionProcessers.put(partition.partition(), new KafkaRewindablePartitionProcessor(_consumer, partition, _run));
             }
         }
-        return offset;
+        return new HashSet<>(_partitionProcessers.values());
     }
 }

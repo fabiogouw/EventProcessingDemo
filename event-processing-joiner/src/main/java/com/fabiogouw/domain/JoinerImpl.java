@@ -40,8 +40,9 @@ public class JoinerImpl implements Joiner {
     private void addState(State state) {
         long currentStateOffset = _repository.getOffsetForPartition(state.getPartition());
         if(currentStateOffset < state.getOffset() - 1) {
-            long offsetToGo = currentStateOffset < 0 ? -1 : currentStateOffset;
-            _eventSource.rewindTo(state.getPartition(), offsetToGo);
+            _logger.warn("Something is strange. While processing the partition {}, the current offset should be {}, but it was {}.", state.getPartition(), state.getOffset() - 1, currentStateOffset);
+            long offsetToGo = currentStateOffset < 0 ? Joiner.BEGGINING_OFFSET : currentStateOffset;
+            _eventSource.rewindTo(state.getPartition(), offsetToGo, state.getOffset());
         }
         else {
             Join join = _repository.get(state.getId());
@@ -53,7 +54,7 @@ public class JoinerImpl implements Joiner {
                         _onCompletion.accept(join.getId());
                     }
                     catch(Exception ex) {
-                        _logger.error("Error while processing partition {}, offset {}. Details: {}", state.getPartition(), state.getOffset(), ex);
+                        _logger.error("Error while processing join on partition {}, offset {}. Details: {}", state.getPartition(), state.getOffset(), ex);
                     }
                 }
             }

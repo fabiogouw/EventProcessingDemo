@@ -2,7 +2,6 @@ package com.fabiogouw.eventprocessingapp.adapters.runners;
 
 import com.fabiogouw.eventprocessingapp.adapters.dtos.Debit;
 import com.fabiogouw.eventprocessingapp.ports.DebitNotifier;
-import com.fabiogouw.eventprocessinglib.ports.EventConsumer;
 import com.fabiogouw.ports.Joiner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,22 +12,19 @@ import java.util.Arrays;
 import java.util.UUID;
 
 @Service
-public class ServiceRunner implements CommandLineRunner {
+public class EventJoinServiceRunner implements CommandLineRunner {
 
-    private final EventConsumer _consumer;
     private final Joiner _joiner;
-    private final Logger _logger = LoggerFactory.getLogger(ServiceRunner.class);
+    private final Logger _logger = LoggerFactory.getLogger(EventJoinServiceRunner.class);
     private final DebitNotifier _debitNotifier;
 
-    public ServiceRunner(EventConsumer consumer, Joiner joiner, DebitNotifier debitNotifier) {
-        _consumer = consumer;
+    public EventJoinServiceRunner(Joiner joiner, DebitNotifier debitNotifier) {
         _joiner = joiner;
         _debitNotifier = debitNotifier;
     }
 
     @Override
     public void run(String... args) throws Exception {
-        _consumer.start();
         _joiner.setBehavior(Arrays.asList("com.fabiogouw.eventprocessingdemo.FraudAnalysisResult",
                 "com.fabiogouw.eventprocessingdemo.LimitAnalysisResult"), (id) -> {
             _logger.info("Join completed and emitting a debit request for {}...", id);
@@ -37,7 +33,6 @@ public class ServiceRunner implements CommandLineRunner {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                _consumer.stop();
                 _joiner.stop();
             }
         });
