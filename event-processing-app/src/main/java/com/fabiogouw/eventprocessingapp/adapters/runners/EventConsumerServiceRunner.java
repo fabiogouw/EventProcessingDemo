@@ -1,8 +1,6 @@
 package com.fabiogouw.eventprocessingapp.adapters.runners;
 
-import com.fabiogouw.eventprocessingapp.ports.DebitNotifier;
 import com.fabiogouw.eventprocessinglib.ports.EventConsumer;
-import com.fabiogouw.ports.Joiner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;

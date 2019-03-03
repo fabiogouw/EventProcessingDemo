@@ -2,15 +2,15 @@ package com.fabiogouw.eventprocessingapp;
 
 import com.fabiogouw.adapters.KafkaJoinNotifier;
 import com.fabiogouw.adapters.KafkaRewindableEventSource;
-import com.fabiogouw.adapters.RedisJoinerStateRepository;
-import com.fabiogouw.domain.JoinerImpl;
-import com.fabiogouw.domain.State;
+import com.fabiogouw.adapters.RedisJoinStateRepository;
+import com.fabiogouw.domain.JoinManagerImpl;
+import com.fabiogouw.domain.valueObjects.CommandState;
 import com.fabiogouw.eventprocessinglib.adapters.services.EventConsumerImpl;
 import com.fabiogouw.eventprocessinglib.ports.EventConsumer;
 import com.fabiogouw.eventprocessinglib.ports.EventHandler;
 import com.fabiogouw.eventprocessinglib.ports.EventSource;
 import com.fabiogouw.ports.JoinNotifier;
-import com.fabiogouw.ports.Joiner;
+import com.fabiogouw.ports.JoinManager;
 import io.micrometer.core.instrument.Timer;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -26,6 +26,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import redis.clients.jedis.Jedis;
 
 import java.util.Collections;
 import java.util.List;
@@ -47,8 +48,8 @@ public class EventProcessingDemoApplication {
     }
 
     @Bean
-    public Joiner getJoiner() {
-        return new JoinerImpl(new RedisJoinerStateRepository(), new KafkaRewindableEventSource(createConsumer(_bootstrapAddress)));
+    public JoinManager getJoiner() {
+        return new JoinManagerImpl(new RedisJoinStateRepository(new Jedis("172.17.0.2"), 300), new KafkaRewindableEventSource(createConsumer(_bootstrapAddress)));
     }
 
     @Bean
@@ -56,7 +57,7 @@ public class EventProcessingDemoApplication {
         return new KafkaJoinNotifier(createProducer(_bootstrapAddress));
     }
 
-    private static Consumer<String, State> createConsumer(String bootstrapAddress) {
+    private static Consumer<String, CommandState> createConsumer(String bootstrapAddress) {
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "joiner");
@@ -66,13 +67,13 @@ public class EventProcessingDemoApplication {
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-        Consumer<String, State> consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(Collections.singletonList("joiner"));
+        Consumer<String, CommandState> consumer = new KafkaConsumer<>(props);
+        consumer.subscribe(Collections.singletonList("join.events"));
         return consumer;
     }
 
 
-    public static Producer<String, State> createProducer(String bootstrapAddress) {
+    public static Producer<String, CommandState> createProducer(String bootstrapAddress) {
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
         props.put(ProducerConfig.CLIENT_ID_CONFIG, "joinernotifier");

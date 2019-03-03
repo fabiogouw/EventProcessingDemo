@@ -1,8 +1,8 @@
 package com.fabiogouw.ports;
 
-import com.fabiogouw.domain.Join;
+import com.fabiogouw.domain.entities.Join;
 
-public interface JoinerStateRepository {
+public interface JoinStateRepository {
     long getOffsetForPartition(int partition);
     Join get(String id);
     void save(Join join, int partition, long offset);

@@ -5,7 +5,7 @@ import java.util.UUID;
 public class FraudAnalysisResult {
     private UUID _id;
     private UUID _correlationId;
-    private String _accountTo;
+    private String _accountFrom;
     private String _result;
 
     public UUID getId() {
@@ -24,12 +24,12 @@ public class FraudAnalysisResult {
         _correlationId = value;
     }
 
-    public String getAccountTo() {
-        return _accountTo;
+    public String getAccountFrom() {
+        return _accountFrom;
     }
 
-    public void setAccountTo(String value) {
-        _accountTo = value;
+    public void setAccountFrom(String value) {
+        _accountFrom = value;
     }
 
     public String getResult() {
@@ -44,10 +44,10 @@ public class FraudAnalysisResult {
 
     }
 
-    public FraudAnalysisResult(UUID id, UUID correlationId, String accountTo, String result) {
+    public FraudAnalysisResult(UUID id, UUID correlationId, String accountFrom, String result) {
         _id = id;
         _correlationId = correlationId;
-        _accountTo = accountTo;
+        _accountFrom = accountFrom;
         _result = result;
     }
 }

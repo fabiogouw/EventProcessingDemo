@@ -1,6 +1,7 @@
 package com.fabiogouw.eventprocessingapp.adapters.handlers;
 
 import com.fabiogouw.eventprocessingapp.adapters.dtos.Debit;
+import com.fabiogouw.eventprocessingapp.adapters.dtos.FraudAnalysisResult;
 import com.fabiogouw.eventprocessingapp.adapters.dtos.Withdraw;
 import com.fabiogouw.eventprocessingapp.ports.DebitNotifier;
 import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
@@ -16,6 +17,7 @@ public class WithdrawFraudAnalysisEventHandler implements EventHandler {
 
     private final Logger _logger = LoggerFactory.getLogger(WithdrawFraudAnalysisEventHandler.class);
     private final JoinNotifier _joinNotifier;
+    private final ObjectMapper _mapper = new ObjectMapper();
 
     public WithdrawFraudAnalysisEventHandler(JoinNotifier joinNotifier) {
         _joinNotifier = joinNotifier;
@@ -38,12 +40,12 @@ public class WithdrawFraudAnalysisEventHandler implements EventHandler {
 
     @Override
     public void handle(CustomEvent event) {
-        ObjectMapper mapper = new ObjectMapper();
-        Withdraw withdraw = mapper.convertValue(event.getPayload(), Withdraw.class);
+        Withdraw withdraw = _mapper.convertValue(event.getPayload(), Withdraw.class);
         if(withdraw != null) {
             String id = withdraw.getId().toString();
             _logger.info("Notifying join 'com.fabiogouw.eventprocessingdemo.FraudAnalysisResult' for {}...", id);
-            _joinNotifier.notify(id, "com.fabiogouw.eventprocessingdemo.FraudAnalysisResult");
+            FraudAnalysisResult result = new FraudAnalysisResult(UUID.randomUUID(), UUID.fromString(id),  withdraw.getAccountFrom(), "ok");
+            _joinNotifier.notify(id, "com.fabiogouw.eventprocessingdemo.FraudAnalysisResult", result);
         }
     }
 }

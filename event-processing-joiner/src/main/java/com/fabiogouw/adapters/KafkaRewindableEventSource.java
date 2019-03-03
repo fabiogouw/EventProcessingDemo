@@ -1,6 +1,6 @@
 package com.fabiogouw.adapters;
 
-import com.fabiogouw.domain.State;
+import com.fabiogouw.domain.valueObjects.CommandState;
 import com.fabiogouw.ports.RewindableEventSource;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -18,17 +18,17 @@ import java.util.function.Consumer;
 public class KafkaRewindableEventSource implements RewindableEventSource {
 
     private final Logger _logger = LoggerFactory.getLogger(KafkaRewindableEventSource.class);
-    private org.apache.kafka.clients.consumer.Consumer<String, State> _consumer;
+    private org.apache.kafka.clients.consumer.Consumer<String, CommandState> _consumer;
     private volatile boolean _running = false;
-    private final Map<Integer, KafkaRewindablePartitionProcessor> _partitionProcessers = new HashMap<>();
-    private Consumer<State> _run;
+    private final Map<Integer, KafkaRewindablePartitionProcessor> _partitionProcessors = new HashMap<>();
+    private Consumer<CommandState> _run;
 
-    public KafkaRewindableEventSource(org.apache.kafka.clients.consumer.Consumer<String, State> consumer) {
+    public KafkaRewindableEventSource(org.apache.kafka.clients.consumer.Consumer<String, CommandState> consumer) {
         _consumer = consumer;
     }
 
     @Override
-    public void subscribe(Consumer<State> run) {
+    public void subscribe(Consumer<CommandState> run) {
         _run = run;
         _logger.info("KafkaRewindableEventSource subscribed.");
         _running = true;
@@ -39,13 +39,13 @@ public class KafkaRewindableEventSource implements RewindableEventSource {
 
     @Override
     public void setProcessedOffset(int partition, long offset) {
-        _partitionProcessers.get(partition).setCurrentOffset(offset);
+        _partitionProcessors.get(partition).setCurrentOffset(offset);
     }
 
     @Override
     public void rewindTo(int partition, long offsetToGo, long triggerOffset) {
         _logger.info("KafkaRewindableEventSource - Partition {} marked to rewind to {}, triggered by {}.", partition,  offsetToGo, triggerOffset);
-        _partitionProcessers.get(partition).markOffsetToRewind(offsetToGo, triggerOffset);
+        _partitionProcessors.get(partition).markOffsetToRewind(offsetToGo, triggerOffset);
     }
 
     @Override
@@ -59,10 +59,10 @@ public class KafkaRewindableEventSource implements RewindableEventSource {
             _logger.info("KafkaRewindableEventSource is starting to consume...");
             Map<TopicPartition, OffsetAndMetadata> commitMap = new HashMap<>();
             while(_running) {
-                ConsumerRecords<String, State> consumerRecords = _consumer.poll(Duration.ofMillis(500));
+                ConsumerRecords<String, CommandState> consumerRecords = _consumer.poll(Duration.ofMillis(500));
                 Set<KafkaRewindablePartitionProcessor> partitionProcessors = getPartitionProcessors(consumerRecords.partitions());
                 for(KafkaRewindablePartitionProcessor partitionProcessor : partitionProcessors) {
-                    List<ConsumerRecord<String, State>> recordsPerPartition = consumerRecords.records(partitionProcessor.getTopicPartition());
+                    List<ConsumerRecord<String, CommandState>> recordsPerPartition = consumerRecords.records(partitionProcessor.getTopicPartition());
                     if(recordsPerPartition.size() > 0) {
                         partitionProcessor.setConsumerPosition();
                         boolean shouldCommit = partitionProcessor.processRecords(recordsPerPartition);
@@ -80,17 +80,17 @@ public class KafkaRewindableEventSource implements RewindableEventSource {
         }
         finally {
             _consumer.close();
-            _partitionProcessers.clear();
+            _partitionProcessors.clear();
             _logger.info("KafkaRewindableEventSource closed.");
         }
     }
 
     private Set<KafkaRewindablePartitionProcessor> getPartitionProcessors(Set<TopicPartition> partitions) {
         for(TopicPartition partition : partitions) {
-            if(!_partitionProcessers.containsKey(partition.partition())) {
-                _partitionProcessers.put(partition.partition(), new KafkaRewindablePartitionProcessor(_consumer, partition, _run));
+            if(!_partitionProcessors.containsKey(partition.partition())) {
+                _partitionProcessors.put(partition.partition(), new KafkaRewindablePartitionProcessor(_consumer, partition, _run));
             }
         }
-        return new HashSet<>(_partitionProcessers.values());
+        return new HashSet<>(_partitionProcessors.values());
     }
 }
