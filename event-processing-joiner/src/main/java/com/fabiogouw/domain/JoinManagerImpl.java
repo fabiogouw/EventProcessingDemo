@@ -18,7 +18,7 @@ import java.util.function.Predicate;
 
 public class JoinManagerImpl implements JoinManager {
     private List<String> _expectedStates;
-    private Consumer<String> _onCompletion;
+    private Consumer<Join> _onCompletion;
     private final JoinStateRepository _repository;
     private final RewindableEventSource _eventSource;
     private Predicate<Set<EventState>> _checkJoin;
@@ -32,7 +32,7 @@ public class JoinManagerImpl implements JoinManager {
         _checkJoin = this::checkJoin;   //we might want to change the default state validation
     }
 
-    public void setBehavior(List<String> expectedStates, Consumer<String> onCompletion) {
+    public void setBehavior(List<String> expectedStates, Consumer<Join> onCompletion) {
         _eventSource.unsubscribe();
         _expectedStates = expectedStates;
         _onCompletion = onCompletion;
@@ -58,7 +58,7 @@ public class JoinManagerImpl implements JoinManager {
                 boolean shouldComplete = _checkJoin.test(join.getStates());
                 if(shouldComplete) {
                     try {
-                        _onCompletion.accept(join.getId());
+                        _onCompletion.accept(join);
                     }
                     catch(Exception ex) {
                         _logger.error("Error while processing join on partition {}, offset {}. Details: {}", commandState.getPartition(), commandState.getOffset(), ex);
