@@ -25,7 +25,7 @@ public class FraudAnalysisNotifierImpl implements FraudAnalysisNotifier {
     @Override
     public void notifyResult(FraudAnalysisResult result) {
         Message<CustomEvent> message = MessageBuilder
-                .withPayload(new CustomEvent("com.fabiogouw.eventprocessingdemo.FraudAnalysisResult", 1, result))
+                .withPayload(new CustomEvent(result.getId().toString(), "com.fabiogouw.eventprocessingdemo.FraudAnalysisResult", 1, result))
                 .setHeader(KafkaHeaders.TOPIC, TOPIC)
                 .setHeader(KafkaHeaders.MESSAGE_KEY, result.getId().toString())
                 .setHeader("event_type", "com.fabiogouw.eventprocessingdemo.FraudAnalysisResult")

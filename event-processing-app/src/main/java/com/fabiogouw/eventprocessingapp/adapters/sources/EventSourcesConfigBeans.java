@@ -1,5 +1,6 @@
 package com.fabiogouw.eventprocessingapp.adapters.sources;
 
+import com.fabiogouw.adapters.DefaultJoinEventHandler;
 import com.fabiogouw.eventprocessingapp.adapters.handlers.WithdrawFraudAnalysisEventHandler;
 import com.fabiogouw.eventprocessingapp.adapters.handlers.WithdrawLimitAnalysisEventHandler;
 import com.fabiogouw.eventprocessingapp.ports.DebitNotifier;
@@ -74,6 +75,18 @@ public class EventSourcesConfigBeans {
     @Qualifier("Withdraw")
     public EventSource getWithdrawEventSource(KafkaListenerEndpointRegistry registry) {
         return new WithdrawEventSource(registry);
+    }
+
+    @Bean
+    @Qualifier("withdrawDebitJoinEventHandlers")
+    public EventHandler getWithdrawFraudAnalysisEventHandlerForDebitJoin(@Qualifier("fraudAndLimitJoinForWithdraw") JoinNotifier joinNotifier) {
+        return new DefaultJoinEventHandler(joinNotifier, "com.fabiogouw.eventprocessingdemo.FraudAnalysisResult", 1, 1);
+    }
+
+    @Bean
+    @Qualifier("withdrawDebitJoinEventHandlers")
+    public EventHandler getWithdrawLimitAnalysisEventHandlerForDebitJoin(@Qualifier("fraudAndLimitJoinForWithdraw") JoinNotifier joinNotifier) {
+        return new DefaultJoinEventHandler(joinNotifier, "com.fabiogouw.eventprocessingdemo.LimitAnalysisResult", 1, 1);
     }
 
     @Bean

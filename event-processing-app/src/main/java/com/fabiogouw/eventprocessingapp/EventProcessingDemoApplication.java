@@ -3,7 +3,7 @@ package com.fabiogouw.eventprocessingapp;
 import com.fabiogouw.adapters.KafkaJoinNotifier;
 import com.fabiogouw.adapters.KafkaRewindableEventSource;
 import com.fabiogouw.adapters.RedisJoinStateRepository;
-import com.fabiogouw.domain.JoinManagerImpl;
+import com.fabiogouw.adapters.JoinManagerImpl;
 import com.fabiogouw.domain.valueObjects.CommandState;
 import com.fabiogouw.eventprocessinglib.adapters.services.EventConsumerImpl;
 import com.fabiogouw.eventprocessinglib.ports.EventConsumer;
@@ -43,6 +43,9 @@ public class EventProcessingDemoApplication {
     @Value(value = "${spring.kafka.consumer.bootstrap-servers}")
     private String _bootstrapAddress;
 
+    @Value(value = "${join.state.redis-host-name:}")
+    private String _redisStateHostname;
+
     @Bean
     public EventConsumer getEventConsumer(List<EventHandler> handlers, List<EventSource> sources, Timer timer) {
         return new EventConsumerImpl(handlers, sources, timer);
@@ -50,8 +53,8 @@ public class EventProcessingDemoApplication {
 
     @Bean
     @Qualifier("fraudAndLimitJoinForWithdraw")
-    public JoinManager getJoin() {
-        return new JoinManagerImpl(new RedisJoinStateRepository(new Jedis("172.17.0.2"), 300),
+    public JoinManager getfraudAndLimitJoinForWithdraw(@Qualifier("withdrawDebitJoinEventHandlers") EventHandler[] withdrawDebitEventHandlers) {
+        return new JoinManagerImpl(withdrawDebitEventHandlers, new RedisJoinStateRepository(new Jedis(_redisStateHostname), 300),
                 new KafkaRewindableEventSource(createConsumer(_bootstrapAddress, "join.events")));
     }
 

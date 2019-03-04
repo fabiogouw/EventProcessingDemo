@@ -31,8 +31,8 @@ public class EventConsumerImpl implements EventConsumer {
                 if(eventHandler.getType().equals(event.getType())
                         && eventHandler.getLowestVersion() >= event.getVersion()
                         && eventHandler.getHighestVersion() <= event.getVersion()) {
-                    processed = true;
                     eventHandler.handle(event);
+                    processed = true;
                 }
             }
             if(!processed) {
@@ -46,6 +46,8 @@ public class EventConsumerImpl implements EventConsumer {
         for (EventSource source : _sources) {
             source.subscribe(this::consume);
         }
+        _logger.info("Event sources loaded and listening: '{}' ...", String.join(", ", _sources.stream().map(s -> s.getClass().getName()).toArray(String[]::new)));
+        _logger.info("Event handlers loaded and waiting for events: '{}' ...", String.join(", ", _handlers.stream().map(s -> s.getClass().getName()).toArray(String[]::new)));
     }
 
     @Override

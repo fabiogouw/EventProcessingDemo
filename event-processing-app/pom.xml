@@ -64,7 +64,7 @@
         </dependency>
         <dependency>
             <groupId>com.fabiogouw</groupId>
-            <artifactId>event-processing-joiner</artifactId>
+            <artifactId>event-processing-join</artifactId>
             <version>1.0</version>
         </dependency>
     </dependencies>

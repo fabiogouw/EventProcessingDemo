@@ -7,6 +7,6 @@ import java.util.function.Consumer;
 
 public interface JoinManager {
     long BEGGINING_OFFSET = -1;
-    void setBehavior(List<String> expectedStates, Consumer<Join> onCompletion);
+    void setBehavior(Consumer<Join> onCompletion);
     void stop();
 }

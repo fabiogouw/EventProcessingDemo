@@ -3,16 +3,25 @@ package com.fabiogouw.eventprocessingapp.adapters.dtos;
 import java.util.UUID;
 
 public class Withdraw {
-    private UUID _id;
+    private String _id;
+    private String _correlationId;
     private String _accountFrom;
     private double _amount;
 
-    public UUID getId() {
+    public String getId() {
         return _id;
     }
 
-    public void setId(UUID value) {
+    public void setId(String value) {
         _id = value;
+    }
+
+    public String getCorrelationId() {
+        return _correlationId;
+    }
+
+    public void setCorrelationId(String value) {
+        _correlationId = value;
     }
 
     public String getAccountFrom() {
@@ -35,8 +44,9 @@ public class Withdraw {
 
     }
 
-    public Withdraw(UUID id, String accountFrom, double amount) {
+    public Withdraw(String id, String correlationId, String accountFrom, double amount) {
         _id = id;
+        _correlationId = correlationId;
         _accountFrom = accountFrom;
         _amount = amount;
     }

@@ -1,8 +1,9 @@
-package com.fabiogouw.domain;
+package com.fabiogouw.adapters;
 
 import com.fabiogouw.domain.entities.Join;
 import com.fabiogouw.domain.valueObjects.CommandState;
 import com.fabiogouw.domain.valueObjects.EventState;
+import com.fabiogouw.eventprocessinglib.ports.EventHandler;
 import com.fabiogouw.ports.JoinManager;
 import com.fabiogouw.ports.JoinStateRepository;
 import com.fabiogouw.ports.RewindableEventSource;
@@ -15,6 +16,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class JoinManagerImpl implements JoinManager {
     private List<String> _expectedStates;
@@ -26,17 +29,22 @@ public class JoinManagerImpl implements JoinManager {
 
     private final Logger _logger = LoggerFactory.getLogger(JoinManagerImpl.class);
 
-    public JoinManagerImpl(JoinStateRepository repository, RewindableEventSource eventSource) {
+    public JoinManagerImpl(EventHandler[] handlers, JoinStateRepository repository, RewindableEventSource eventSource) {
+        this(Stream.of(handlers).map(h -> h.getType()).collect(Collectors.toList()), repository, eventSource);
+    }
+
+    public JoinManagerImpl(List<String> expectedStates, JoinStateRepository repository, RewindableEventSource eventSource) {
+        _expectedStates = expectedStates;
         _repository = repository;
         _eventSource = eventSource;
         _checkJoin = this::checkJoin;   //we might want to change the default state validation
     }
 
-    public void setBehavior(List<String> expectedStates, Consumer<Join> onCompletion) {
+    public void setBehavior(Consumer<Join> onCompletion) {
         _eventSource.unsubscribe();
-        _expectedStates = expectedStates;
         _onCompletion = onCompletion;
         _eventSource.subscribe(this::addState);
+        _logger.info("Join listening to '{}'...", String.join(", ", _expectedStates));
     }
 
     public void stop() {
@@ -55,7 +63,7 @@ public class JoinManagerImpl implements JoinManager {
             EventState state = getEventStateObject(commandState);
             join.addState(state);
             if(currentStateOffset + 1 == commandState.getOffset()) {
-                boolean shouldComplete = _checkJoin.test(join.getStates());
+                boolean shouldComplete = testJoin(join.getStates());
                 if(shouldComplete) {
                     try {
                         _onCompletion.accept(join);
@@ -69,6 +77,16 @@ public class JoinManagerImpl implements JoinManager {
                 _repository.save(join, commandState.getPartition(), commandState.getOffset());
             }
             _eventSource.setProcessedOffset(commandState.getPartition(), commandState.getOffset());
+        }
+    }
+
+    private boolean testJoin(Set<EventState> states) {
+        try {
+            return _checkJoin.test(states);
+        }
+        catch (Exception ex) {
+            _logger.error("Error while checking join: {}", ex.toString());
+            return false;
         }
     }
 

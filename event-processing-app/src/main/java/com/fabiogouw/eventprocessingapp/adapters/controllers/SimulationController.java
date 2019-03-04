@@ -28,7 +28,7 @@ public class SimulationController {
     @PostMapping(value = "/test")
     public void sendMessageToKafkaTopic(@RequestParam("count") int count) {
         for(int i = 0; i < count; i++) {
-            _withdrawNotifier.notifyWithdraw(new Withdraw(UUID.randomUUID(), "CCC", 20));
+            _withdrawNotifier.notifyWithdraw(new Withdraw(UUID.randomUUID().toString(), UUID.randomUUID().toString(), "CCC", 20));
         }
     }
 }

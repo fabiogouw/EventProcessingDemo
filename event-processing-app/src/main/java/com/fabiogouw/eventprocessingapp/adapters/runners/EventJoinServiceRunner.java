@@ -15,27 +15,26 @@ import java.util.UUID;
 @Service
 public class EventJoinServiceRunner implements CommandLineRunner {
 
-    private final JoinManager _joiner;
+    private final JoinManager _joinManager;
     private final Logger _logger = LoggerFactory.getLogger(EventJoinServiceRunner.class);
     private final DebitNotifier _debitNotifier;
 
-    public EventJoinServiceRunner(@Qualifier("fraudAndLimitJoinForWithdraw") JoinManager joiner,
-                                  @Qualifier("fraudAndLimitJoinForWithdraw") DebitNotifier debitNotifier) {
-        _joiner = joiner;
+    public EventJoinServiceRunner(@Qualifier("fraudAndLimitJoinForWithdraw") JoinManager joinManager,
+                                  DebitNotifier debitNotifier) {
+        _joinManager = joinManager;
         _debitNotifier = debitNotifier;
     }
 
     @Override
     public void run(String... args) throws Exception {
-        _joiner.setBehavior(Arrays.asList("com.fabiogouw.eventprocessingdemo.FraudAnalysisResult",
-                "com.fabiogouw.eventprocessingdemo.LimitAnalysisResult"), (join) -> {
+        _joinManager.setBehavior((join) -> {
             _logger.info("Join completed and emitting a debit request for {}...", join.getId());
             _debitNotifier.notifyDebit(new Debit(UUID.randomUUID(), UUID.fromString(join.getId()), "ZZZ", 100.23d));
         });
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                _joiner.stop();
+                _joinManager.stop();
             }
         });
     }

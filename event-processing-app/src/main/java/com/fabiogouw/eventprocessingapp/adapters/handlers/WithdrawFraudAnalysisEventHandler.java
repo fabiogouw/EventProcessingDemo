@@ -1,9 +1,7 @@
 package com.fabiogouw.eventprocessingapp.adapters.handlers;
 
-import com.fabiogouw.eventprocessingapp.adapters.dtos.Debit;
 import com.fabiogouw.eventprocessingapp.adapters.dtos.FraudAnalysisResult;
 import com.fabiogouw.eventprocessingapp.adapters.dtos.Withdraw;
-import com.fabiogouw.eventprocessingapp.ports.DebitNotifier;
 import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
 import com.fabiogouw.eventprocessinglib.ports.EventHandler;
 import com.fabiogouw.ports.JoinNotifier;

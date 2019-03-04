@@ -24,7 +24,7 @@ public class WithdrawNotifierImpl implements WithdrawNotifier {
     @Override
     public void notifyWithdraw(Withdraw withdraw) {
         Message<CustomEvent> message = MessageBuilder
-                .withPayload(new CustomEvent("com.fabiogouw.eventprocessingdemo.WithdrawRequested", 1, withdraw))
+                .withPayload(new CustomEvent(withdraw.getCorrelationId(), "com.fabiogouw.eventprocessingdemo.WithdrawRequested", 1, withdraw))
                 .setHeader(KafkaHeaders.TOPIC, TOPIC)
                 .setHeader(KafkaHeaders.MESSAGE_KEY, withdraw.getId().toString())
                 .setHeader("event_type", "com.fabiogouw.eventprocessingdemo.WithdrawRequested")

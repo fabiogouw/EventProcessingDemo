@@ -25,6 +25,6 @@
     <modules>
         <module>event-processing-app</module>
         <module>event-processing-lib</module>
-        <module>event-processing-joiner</module>
+        <module>event-processing-join</module>
     </modules>
 </project>
