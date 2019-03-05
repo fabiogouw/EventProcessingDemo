@@ -23,7 +23,7 @@ public class WithdrawLimitAnalysisEventHandler implements EventHandler {
 
     @Override
     public String getType() {
-        return "com.fabiogouw.eventprocessingdemo.WithdrawRequested";
+        return Withdraw.EVENT_TYPE;
     }
 
     @Override
@@ -40,10 +40,10 @@ public class WithdrawLimitAnalysisEventHandler implements EventHandler {
     public void handle(CustomEvent event) {
         Withdraw withdraw = _mapper.convertValue(event.getPayload(), Withdraw.class);
         if(withdraw != null) {
-            String id = withdraw.getId().toString();
-            _logger.info("Notifying join 'com.fabiogouw.eventprocessingdemo.LimitAnalysisResult' for {}...", id);
+            String id = withdraw.getId();
+            _logger.info("Notifying join '{}' for {}...", LimitAnalysisResult.EVENT_TYPE, id);
             LimitAnalysisResult result = new LimitAnalysisResult(UUID.randomUUID(), UUID.fromString(id),  withdraw.getAccountFrom(), withdraw.getAmount(), "ok");
-            _joinNotifier.notify(id, "com.fabiogouw.eventprocessingdemo.LimitAnalysisResult",  result);
+            _joinNotifier.notify(id, LimitAnalysisResult.EVENT_TYPE,  result);
         }
     }
 }
