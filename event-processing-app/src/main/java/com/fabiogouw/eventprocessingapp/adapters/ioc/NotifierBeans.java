@@ -1,6 +1,10 @@
-package com.fabiogouw.eventprocessingapp.adapters.producers;
+package com.fabiogouw.eventprocessingapp.adapters.ioc;
 
 import com.fabiogouw.eventprocessingapp.adapters.dtos.*;
+import com.fabiogouw.eventprocessingapp.adapters.producers.DebitNotifierImpl;
+import com.fabiogouw.eventprocessingapp.adapters.producers.FraudAnalysisNotifierImpl;
+import com.fabiogouw.eventprocessingapp.adapters.producers.LimitAnalysisNotifierImpl;
+import com.fabiogouw.eventprocessingapp.adapters.producers.WithdrawNotifierImpl;
 import com.fabiogouw.eventprocessingapp.ports.*;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -20,11 +24,11 @@ import java.util.Map;
 public class NotifierBeans {
 
     @Value(value = "${spring.kafka.producer.bootstrap-servers}")
-    private String bootstrapAddress = "172.19.0.3:9092";
+    private String _bootstrapAddress;
 
     @Bean
     public KafkaTemplate<String, Withdraw> createWithdrawTemplate() {
-        Map<String, Object> senderProps = senderProps();
+        Map<String, Object> senderProps = senderProps(_bootstrapAddress);
         ProducerFactory<String, Withdraw> pf = new DefaultKafkaProducerFactory<>(senderProps);
         KafkaTemplate<String, Withdraw> template = new KafkaTemplate<>(pf);
         return template;
@@ -32,7 +36,7 @@ public class NotifierBeans {
 
     @Bean
     public KafkaTemplate<String, FraudAnalysisResult> createWithdrawFraudAnalysisTemplate() {
-        Map<String, Object> senderProps = senderProps();
+        Map<String, Object> senderProps = senderProps(_bootstrapAddress);
         ProducerFactory<String, FraudAnalysisResult> pf = new DefaultKafkaProducerFactory<>(senderProps);
         KafkaTemplate<String, FraudAnalysisResult> template = new KafkaTemplate<>(pf);
         return template;
@@ -40,7 +44,7 @@ public class NotifierBeans {
 
     @Bean
     public KafkaTemplate<String, LimitAnalysisResult> createWithdrawLimitAnalysisTemplate() {
-        Map<String, Object> senderProps = senderProps();
+        Map<String, Object> senderProps = senderProps(_bootstrapAddress);
         ProducerFactory<String, LimitAnalysisResult> pf = new DefaultKafkaProducerFactory<>(senderProps);
         KafkaTemplate<String, LimitAnalysisResult> template = new KafkaTemplate<>(pf);
         return template;
@@ -48,13 +52,13 @@ public class NotifierBeans {
 
     @Bean
     public KafkaTemplate<String, Debit> createDebirTemplate() {
-        Map<String, Object> senderProps = senderProps();
+        Map<String, Object> senderProps = senderProps(_bootstrapAddress);
         ProducerFactory<String, Debit> pf = new DefaultKafkaProducerFactory<>(senderProps);
         KafkaTemplate<String, Debit> template = new KafkaTemplate<>(pf);
         return template;
     }
 
-    private Map<String, Object> senderProps() {
+    private Map<String, Object> senderProps(String bootstrapAddress) {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
         props.put(ProducerConfig.RETRIES_CONFIG, 0);

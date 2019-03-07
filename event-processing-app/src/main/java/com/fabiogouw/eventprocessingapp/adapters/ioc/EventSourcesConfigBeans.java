@@ -1,9 +1,13 @@
-package com.fabiogouw.eventprocessingapp.adapters.sources;
+package com.fabiogouw.eventprocessingapp.adapters.ioc;
 
 import com.fabiogouw.adapters.DefaultJoinEventHandler;
-import com.fabiogouw.eventprocessingapp.adapters.handlers.WithdrawFraudAnalysisEventHandler;
-import com.fabiogouw.eventprocessingapp.adapters.handlers.WithdrawLimitAnalysisEventHandler;
-import com.fabiogouw.eventprocessingapp.ports.DebitNotifier;
+import com.fabiogouw.eventprocessingapp.adapters.handlers.FraudAnalysisEventHandler;
+import com.fabiogouw.eventprocessingapp.adapters.handlers.LimitAnalysisEventHandler;
+import com.fabiogouw.eventprocessingapp.adapters.sources.FraudAnalysisEventSource;
+import com.fabiogouw.eventprocessingapp.adapters.sources.LimitAnalysisEventSource;
+import com.fabiogouw.eventprocessingapp.adapters.sources.WithdrawEventSource;
+import com.fabiogouw.eventprocessingapp.ports.FraudAnalysisNotifier;
+import com.fabiogouw.eventprocessingapp.ports.LimitAnalysisNotifier;
 import com.fabiogouw.eventprocessinglib.adapters.services.IgnoreMessageErrorHandler;
 import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
 import com.fabiogouw.eventprocessinglib.ports.EventHandler;
@@ -60,21 +64,33 @@ public class EventSourcesConfigBeans {
     }
 
     @Bean
+    @Qualifier("Withdraw")
+    public EventSource getWithdrawEventSource(KafkaListenerEndpointRegistry registry) {
+        return new WithdrawEventSource(registry);
+    }
+
+    @Bean
+    @Qualifier("FraudAnalysis")
+    public EventSource getFraudAnalysisEventSource(KafkaListenerEndpointRegistry registry) {
+        return new FraudAnalysisEventSource(registry);
+    }
+
+    @Bean
+    @Qualifier("LimitAnalysis")
+    public EventSource geLimitAnalysisEventSource(KafkaListenerEndpointRegistry registry) {
+        return new LimitAnalysisEventSource(registry);
+    }
+
+    @Bean
     @Qualifier("WithdrawFraudAnalysis")
-    public EventHandler getWithdrawFraudAnalysisEventHandler(JoinNotifier joinNotifier) {
-        return new WithdrawFraudAnalysisEventHandler(joinNotifier);
+    public EventHandler getWithdrawFraudAnalysisEventHandler(FraudAnalysisNotifier fraudAnalysisNotifier) {
+        return new FraudAnalysisEventHandler(fraudAnalysisNotifier);
     }
 
     @Bean
     @Qualifier("WithdrawLimitAnalysis")
-    public EventHandler getWithdrawLimitAnalysisEventHandler(JoinNotifier joinNotifier) {
-        return new WithdrawLimitAnalysisEventHandler(joinNotifier);
-    }
-
-    @Bean
-    @Qualifier("Withdraw")
-    public EventSource getWithdrawEventSource(KafkaListenerEndpointRegistry registry) {
-        return new WithdrawEventSource(registry);
+    public EventHandler getWithdrawLimitAnalysisEventHandler(LimitAnalysisNotifier limitAnalysisNotifier) {
+        return new LimitAnalysisEventHandler(limitAnalysisNotifier);
     }
 
     @Bean

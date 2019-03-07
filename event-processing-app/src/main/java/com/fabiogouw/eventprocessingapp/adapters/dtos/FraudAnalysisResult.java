@@ -1,26 +1,18 @@
 package com.fabiogouw.eventprocessingapp.adapters.dtos;
 
-import java.util.UUID;
-
 public class FraudAnalysisResult {
-    private UUID _id;
-    private UUID _correlationId;
+
+    public static final String EVENT_TYPE = "com.fabiogouw.eventprocessingdemo.FraudAnalysisResult";
+
+    private String _correlationId;
     private String _accountFrom;
     private String _result;
 
-    public UUID getId() {
-        return _id;
-    }
-
-    public void setId(UUID value) {
-        _id = value;
-    }
-
-    public UUID getCorrelationId() {
+    public String getCorrelationId() {
         return _correlationId;
     }
 
-    public void setCorrelationId(UUID value) {
+    public void setCorrelationId(String value) {
         _correlationId = value;
     }
 
@@ -44,8 +36,7 @@ public class FraudAnalysisResult {
 
     }
 
-    public FraudAnalysisResult(UUID id, UUID correlationId, String accountFrom, String result) {
-        _id = id;
+    public FraudAnalysisResult(String correlationId, String accountFrom, String result) {
         _correlationId = correlationId;
         _accountFrom = accountFrom;
         _result = result;

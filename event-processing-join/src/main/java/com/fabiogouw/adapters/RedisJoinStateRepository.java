@@ -41,6 +41,8 @@ public class RedisJoinStateRepository implements JoinStateRepository {
         Join join = new Join(id, states.entrySet().stream()
                 .map(s -> new EventState(s.getKey(), s.getValue()))
                 .collect(Collectors.toSet()));
+        _logger.debug("Getting join info: Id: {}, States: '{}'.", join.getId(),
+                String.join(", ", join.getStates().stream().map(es -> es.getEvent()).collect(Collectors.toList())));
         return join;
     }
 
@@ -53,6 +55,8 @@ public class RedisJoinStateRepository implements JoinStateRepository {
         _jedis.expire(key, _expirationInSeconds);
         // last thing to do is to update the partition's offset, don't care
         // if the last instructions will get repeated eventually
+        _logger.debug("Saving join info: Id: {}, States: '{}'.", join.getId(),
+                String.join(", ", join.getStates().stream().map(es -> es.getEvent()).collect(Collectors.toList())));
         _logger.debug("Setting offset info for partition {}: {}.", partition, offset);
         _jedis.set(PARTITION_PREFIX + partition, String.valueOf(offset));
     }

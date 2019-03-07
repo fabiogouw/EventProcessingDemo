@@ -29,7 +29,7 @@ public class EventJoinServiceRunner implements CommandLineRunner {
     public void run(String... args) throws Exception {
         _joinManager.setBehavior((join) -> {
             _logger.info("Join completed and emitting a debit request for {}...", join.getId());
-            _debitNotifier.notifyDebit(new Debit(UUID.randomUUID(), UUID.fromString(join.getId()), "ZZZ", 100.23d));
+            _debitNotifier.notifyDebit(new Debit(join.getId(), "ZZZ", 100.23d));
         });
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override

@@ -14,7 +14,7 @@ import org.springframework.messaging.support.MessageBuilder;
 public class FraudAnalysisNotifierImpl implements FraudAnalysisNotifier {
 
     private static final Logger _logger = LoggerFactory.getLogger(FraudAnalysisNotifierImpl.class);
-    private static final String TOPIC = "withdraws";
+    private static final String TOPIC = "fraud";
 
     private KafkaTemplate<String, FraudAnalysisResult> _kafkaTemplate;
 
@@ -25,10 +25,10 @@ public class FraudAnalysisNotifierImpl implements FraudAnalysisNotifier {
     @Override
     public void notifyResult(FraudAnalysisResult result) {
         Message<CustomEvent> message = MessageBuilder
-                .withPayload(new CustomEvent(result.getId().toString(), "com.fabiogouw.eventprocessingdemo.FraudAnalysisResult", 1, result))
+                .withPayload(new CustomEvent(result.getCorrelationId(), FraudAnalysisResult.EVENT_TYPE, 1, result))
                 .setHeader(KafkaHeaders.TOPIC, TOPIC)
-                .setHeader(KafkaHeaders.MESSAGE_KEY, result.getId().toString())
-                .setHeader("event_type", "com.fabiogouw.eventprocessingdemo.FraudAnalysisResult")
+                .setHeader(KafkaHeaders.MESSAGE_KEY, result.getCorrelationId())
+                .setHeader("event_type", FraudAnalysisResult.EVENT_TYPE)
                 .build();
         _logger.info(String.format("#### -> Producing message -> %s", message));
         _kafkaTemplate.send(message);

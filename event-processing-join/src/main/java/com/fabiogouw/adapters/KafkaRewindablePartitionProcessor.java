@@ -56,7 +56,7 @@ public class KafkaRewindablePartitionProcessor {
     public boolean processRecords(List<ConsumerRecord<String, CommandState>> records) {
         for(ConsumerRecord<String, CommandState> record : records) {
             CommandState commandState = record.value();
-            _logger.debug("Processing commandState partition: {} offset: {}...", record.partition(),  record.offset());
+            _logger.debug("Processing state partition: {} offset: {}...", record.partition(),  record.offset());
             try {
                 _run.accept(commandState.augment(record.partition(), record.offset()));
             }

@@ -8,12 +8,12 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.support.Acknowledgment;
 
-public class WithdrawEventSource extends SpringKafkaEventSource {
+public class FraudAnalysisEventSource extends SpringKafkaEventSource {
 
-    private final Logger _logger = LoggerFactory.getLogger(WithdrawEventSource.class);
-    private static final String LISTENER_ID = "WithdrawEventSource";
+    private final Logger _logger = LoggerFactory.getLogger(FraudAnalysisEventSource.class);
+    private static final String LISTENER_ID = "FraudAnalysisEventSource";
 
-    public WithdrawEventSource(KafkaListenerEndpointRegistry registry) {
+    public FraudAnalysisEventSource(KafkaListenerEndpointRegistry registry) {
         super(registry);
     }
 
@@ -22,7 +22,7 @@ public class WithdrawEventSource extends SpringKafkaEventSource {
         return LISTENER_ID;
     }
 
-    @KafkaListener(id = LISTENER_ID, topics = {"withdraws"}, containerFactory = "containerFactory")
+    @KafkaListener(id = LISTENER_ID, topics = {"fraud"}, containerFactory = "containerFactory")
     public void listen(ConsumerRecord<String, CustomEvent> message, Acknowledgment acknowledgment) {
         _logger.info("#### -> Consumed message -> '{}' : '{}' / '{}'", message.topic(),  message.partition(), message.offset());
         CustomEvent event = message.value();

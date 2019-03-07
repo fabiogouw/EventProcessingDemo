@@ -2,23 +2,21 @@ package com.fabiogouw.eventprocessingapp.adapters.handlers;
 
 import com.fabiogouw.eventprocessingapp.adapters.dtos.LimitAnalysisResult;
 import com.fabiogouw.eventprocessingapp.adapters.dtos.Withdraw;
+import com.fabiogouw.eventprocessingapp.ports.LimitAnalysisNotifier;
 import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
 import com.fabiogouw.eventprocessinglib.ports.EventHandler;
-import com.fabiogouw.ports.JoinNotifier;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.UUID;
+public class LimitAnalysisEventHandler implements EventHandler {
 
-public class WithdrawLimitAnalysisEventHandler implements EventHandler {
-
-    private final Logger _logger = LoggerFactory.getLogger(WithdrawLimitAnalysisEventHandler.class);
-    private final JoinNotifier _joinNotifier;
+    private final Logger _logger = LoggerFactory.getLogger(LimitAnalysisEventHandler.class);
+    private final LimitAnalysisNotifier _limitAnalysisNotifier;
     private final ObjectMapper _mapper = new ObjectMapper();
 
-    public WithdrawLimitAnalysisEventHandler(JoinNotifier joinNotifier) {
-        _joinNotifier = joinNotifier;
+    public LimitAnalysisEventHandler(LimitAnalysisNotifier limitAnalysisNotifier) {
+        _limitAnalysisNotifier = limitAnalysisNotifier;
     }
 
     @Override
@@ -40,10 +38,10 @@ public class WithdrawLimitAnalysisEventHandler implements EventHandler {
     public void handle(CustomEvent event) {
         Withdraw withdraw = _mapper.convertValue(event.getPayload(), Withdraw.class);
         if(withdraw != null) {
-            String id = withdraw.getId();
-            _logger.info("Notifying join '{}' for {}...", LimitAnalysisResult.EVENT_TYPE, id);
-            LimitAnalysisResult result = new LimitAnalysisResult(UUID.randomUUID(), UUID.fromString(id),  withdraw.getAccountFrom(), withdraw.getAmount(), "ok");
-            _joinNotifier.notify(id, LimitAnalysisResult.EVENT_TYPE,  result);
+            _logger.info("Analysing limit for operation '{}'...", event.getCorrelationId());
+            String analysisResult = withdraw.getAmount() > 5000 ? "nok" : "ok";
+            LimitAnalysisResult result = new LimitAnalysisResult(event.getCorrelationId(), withdraw.getAccountFrom(), withdraw.getAmount(), analysisResult);
+            _limitAnalysisNotifier.notifyResult(result);
         }
     }
 }

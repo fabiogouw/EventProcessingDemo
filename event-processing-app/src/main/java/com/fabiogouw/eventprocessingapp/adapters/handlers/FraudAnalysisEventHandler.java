@@ -5,20 +5,19 @@ import com.fabiogouw.eventprocessingapp.adapters.dtos.Withdraw;
 import com.fabiogouw.eventprocessingapp.ports.FraudAnalysisNotifier;
 import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
 import com.fabiogouw.eventprocessinglib.ports.EventHandler;
-import com.fabiogouw.ports.JoinNotifier;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
-public class WithdrawFraudAnalysisEventHandler implements EventHandler {
+public class FraudAnalysisEventHandler implements EventHandler {
 
-    private final Logger _logger = LoggerFactory.getLogger(WithdrawFraudAnalysisEventHandler.class);
+    private final Logger _logger = LoggerFactory.getLogger(FraudAnalysisEventHandler.class);
     private final FraudAnalysisNotifier _fraudAnalysisNotifier;
     private final ObjectMapper _mapper = new ObjectMapper();
 
-    public WithdrawFraudAnalysisEventHandler(FraudAnalysisNotifier fraudAnalysisNotifier) {
+    public FraudAnalysisEventHandler(FraudAnalysisNotifier fraudAnalysisNotifier) {
         _fraudAnalysisNotifier = fraudAnalysisNotifier;
     }
 
@@ -41,10 +40,10 @@ public class WithdrawFraudAnalysisEventHandler implements EventHandler {
     public void handle(CustomEvent event) {
         Withdraw withdraw = _mapper.convertValue(event.getPayload(), Withdraw.class);
         if(withdraw != null) {
-            _logger.info("Notifying join '{}' for {}...", FraudAnalysisResult.EVENT_TYPE, event.getCorrelationId());
+            _logger.info("Analysing fraud for operation '{}'...", event.getCorrelationId());
             // simulate some analysis (10% are fraud)
             String analysisResult = UUID.randomUUID().hashCode() % 10 == 0 ? "nok" : "ok";
-            FraudAnalysisResult result = new FraudAnalysisResult(UUID.randomUUID().toString() , event.getCorrelationId(),  withdraw.getAccountFrom(), analysisResult);
+            FraudAnalysisResult result = new FraudAnalysisResult(event.getCorrelationId(), withdraw.getAccountFrom(), analysisResult);
             _fraudAnalysisNotifier.notifyResult(result);
         }
     }

@@ -101,6 +101,9 @@ public class JoinManagerImpl implements JoinManager {
     }
 
     private boolean checkJoin(Set<EventState> currentEventStates) {
+        _logger.debug("Checking join: Expected: {}. Current: {}",
+                String.join(", ", _expectedStates),
+                String.join(", ", currentEventStates.stream().map(es -> es.getEvent()).collect(Collectors.toList())));
         int expectedCount = _expectedStates.size();
         for(EventState eventState : currentEventStates) {
             if(_expectedStates.contains(eventState.getEvent())) {

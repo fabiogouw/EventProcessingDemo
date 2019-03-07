@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Random;
 import java.util.UUID;
 
 @RestController
@@ -27,8 +28,9 @@ public class SimulationController {
 
     @PostMapping(value = "/test")
     public void sendMessageToKafkaTopic(@RequestParam("count") int count) {
+        Random rnd = new Random();
         for(int i = 0; i < count; i++) {
-            _withdrawNotifier.notifyWithdraw(new Withdraw(UUID.randomUUID().toString(), UUID.randomUUID().toString(), "CCC", 20));
+            _withdrawNotifier.notifyWithdraw(new Withdraw(UUID.randomUUID().toString(), "CCC", rnd.nextInt(5999) + 1));
         }
     }
 }
