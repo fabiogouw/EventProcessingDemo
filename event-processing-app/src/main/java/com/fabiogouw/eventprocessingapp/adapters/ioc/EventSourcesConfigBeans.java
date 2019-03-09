@@ -8,8 +8,10 @@ import com.fabiogouw.eventprocessingapp.adapters.sources.LimitAnalysisEventSourc
 import com.fabiogouw.eventprocessingapp.adapters.sources.WithdrawEventSource;
 import com.fabiogouw.eventprocessingapp.ports.FraudAnalysisNotifier;
 import com.fabiogouw.eventprocessingapp.ports.LimitAnalysisNotifier;
+import com.fabiogouw.eventprocessinglib.adapters.services.EventConsumerImpl;
 import com.fabiogouw.eventprocessinglib.adapters.services.IgnoreMessageErrorHandler;
 import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
+import com.fabiogouw.eventprocessinglib.ports.EventConsumer;
 import com.fabiogouw.eventprocessinglib.ports.EventHandler;
 import com.fabiogouw.eventprocessinglib.ports.EventSource;
 import com.fabiogouw.ports.JoinNotifier;
@@ -31,7 +33,12 @@ import org.springframework.kafka.listener.*;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 @EnableKafka
 @Configuration
@@ -106,10 +113,22 @@ public class EventSourcesConfigBeans {
     }
 
     @Bean
-    public Timer getTimer() {
-        MeterRegistry registry = new SimpleMeterRegistry();
-        Metrics.addRegistry(registry);
-        Timer timer = Timer.builder("app.eventsProcessed").tag("method", "manual").register(registry);
-        return timer;
+    public Function<String, Timer> getTimerFactory() {
+        return (type) -> {
+            MeterRegistry registry = new SimpleMeterRegistry();
+            Metrics.addRegistry(registry);
+            Timer timer = Timer.builder("app.eventsProcessed." + type).tag("method", "manual").register(registry);
+            return timer;
+        };
+    }
+
+    @Bean
+    public Map<String, Timer> getEventMetrics() {
+        return new ConcurrentHashMap<>();
+    }
+
+    @Bean
+    public EventConsumer getEventConsumer(List<EventHandler> handlers, List<EventSource> sources, Function<String, Timer> timerFactory,  Map<String, Timer> eventMetrics) {
+        return new EventConsumerImpl(handlers, sources, timerFactory, eventMetrics);
     }
 }

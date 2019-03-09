@@ -1,9 +1,9 @@
 package com.fabiogouw.eventprocessingapp.adapters.controllers;
 
-import com.fabiogouw.eventprocessinglib.dtos.EventsProcessedMetric;
 import io.micrometer.core.instrument.Timer;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
+import org.springframework.boot.actuate.endpoint.annotation.Selector;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
@@ -14,25 +14,37 @@ import java.util.concurrent.TimeUnit;
 @Endpoint(id="events-processed")
 public class EventsProcessedMetricEndPoint {
 
-    private final Timer _timer;
+    private final Map<String, Timer> _eventMetrics;
 
-    public EventsProcessedMetricEndPoint(Timer timer) {
-        _timer = timer;
+    public EventsProcessedMetricEndPoint(Map<String, Timer> eventMetrics) {
+        _eventMetrics = eventMetrics;
     }
 
     @ReadOperation
-    public EventsProcessedMetric getEventsProcessedMetrics() {
-        Map<String, Double> details = new LinkedHashMap<>();
-        double totalTime = _timer.totalTime(TimeUnit.MILLISECONDS);
-        double eventsProcessed = _timer.count();
-        if(_timer.count() > 0) {
-            details.put("TotalTimeProcessingEventsInMilliseconds", totalTime);
-            details.put("EventsProcessed", eventsProcessed);
-            double averageTimePerEvent = totalTime / eventsProcessed;
-            details.put("AverageTimePerEventInMilliseconds", averageTimePerEvent);
-            double tps = eventsProcessed / totalTime * 1000;
-            details.put("TPS", tps);
+    public Map<String, Map<String, String>> getEventsProcessedMetrics() {
+        Map<String, Map<String, String>> allMetrics = new LinkedHashMap<>();
+        _eventMetrics.forEach((eventType, timer) -> {
+            allMetrics.put(eventType, getEventsProcessedMetricsById(eventType));
+        });
+        return allMetrics;
+    }
+
+    @ReadOperation
+    public Map<String, String> getEventsProcessedMetricsById(@Selector String eventType) {
+        Map<String, String> metrics = new LinkedHashMap<>();
+        Timer timer = _eventMetrics.get(eventType);
+        if(timer != null) {
+            double totalTime = timer.totalTime(TimeUnit.MILLISECONDS);
+            double eventsProcessed = timer.count();
+            if(timer.count() > 0) {
+                metrics.put("TotalTimeProcessingEventsInMilliseconds", String.valueOf(totalTime));
+                metrics.put("EventsProcessed", String.valueOf(eventsProcessed));
+                double averageTimePerEvent = totalTime / eventsProcessed;
+                metrics.put("AverageTimePerEventInMilliseconds", String.valueOf(averageTimePerEvent));
+                double tps = eventsProcessed / totalTime * 1000;
+                metrics.put("TPS", String.valueOf(tps));
+            }
         }
-        return new EventsProcessedMetric(details);
+        return metrics;
     }
 }

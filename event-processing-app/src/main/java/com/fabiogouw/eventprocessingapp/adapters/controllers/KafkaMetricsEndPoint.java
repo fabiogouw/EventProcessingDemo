@@ -1,6 +1,5 @@
 package com.fabiogouw.eventprocessingapp.adapters.controllers;
 
-import com.fabiogouw.eventprocessinglib.dtos.EventsProcessedMetric;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.annotation.Selector;
@@ -82,7 +81,7 @@ public class KafkaMetricsEndPoint {
     }
 
     private Map<String, String> getKafkaTemplateMetricsById(String id) {
-        Map<String, String> metrics = new HashMap<>();
+        Map<String, String> metrics = new LinkedHashMap<>();
 //        for (KafkaTemplate<?,  ?> template :_templates) {
 //        }
 //        MessageListenerContainer container = _kafkaListenerEndpointRegistry.getListenerContainer(id);
@@ -97,7 +96,7 @@ public class KafkaMetricsEndPoint {
 
     private Map<String, String> getMessageListenerContainerMetricsById(String id) {
         MessageListenerContainer container = _kafkaListenerEndpointRegistry.getListenerContainer(id);
-        Map<String, String> metrics = new HashMap<>();
+        Map<String, String> metrics = new LinkedHashMap<>();
         if(container != null) {
             container.metrics().forEach((a, b) -> {
                 b.forEach((c,  d) -> {

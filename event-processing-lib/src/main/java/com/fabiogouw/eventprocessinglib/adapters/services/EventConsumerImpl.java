@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 public class EventConsumerImpl implements EventConsumer {
 
@@ -16,16 +18,22 @@ public class EventConsumerImpl implements EventConsumer {
 
     private final List<EventHandler> _handlers;
     private final List<EventSource> _sources;
-    private final Timer _timer;
+    private final Function<String, Timer> _timerFactory;
+    private final Map<String, Timer> _eventMetrics;
 
-    public EventConsumerImpl(List<EventHandler> handlers, List<EventSource> sources, Timer timer) {
+    public EventConsumerImpl(List<EventHandler> handlers,
+                             List<EventSource> sources,
+                             Function<String, Timer> timerFactory,
+                             Map<String, Timer> eventMetrics) {
         _handlers = handlers;
         _sources = sources;
-        _timer = timer;
+        _timerFactory = timerFactory;
+        _eventMetrics = eventMetrics;
     }
 
     public void consume(CustomEvent event) {
-        _timer.record(() -> {
+        Timer timer = getTimerForMetrics(event.getType());
+        timer.record(() -> {
             boolean processed = false;
             for(EventHandler eventHandler : _handlers) {
                 if(eventHandler.getType().equals(event.getType())
@@ -39,6 +47,13 @@ public class EventConsumerImpl implements EventConsumer {
                 _logger.warn("Event '{}' (version {}} ignored because no handler can fit it...", event.getType(), event.getVersion());
             }
         });
+    }
+
+    private Timer getTimerForMetrics(String eventType) {
+        if(!_eventMetrics.containsKey(eventType)) {
+            _eventMetrics.put(eventType, _timerFactory.apply(eventType));
+        }
+        return _eventMetrics.get(eventType);
     }
 
     @Override

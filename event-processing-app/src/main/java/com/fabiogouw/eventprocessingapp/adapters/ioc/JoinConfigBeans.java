@@ -41,11 +41,6 @@ public class JoinConfigBeans {
     private String _redisStateHostname;
 
     @Bean
-    public EventConsumer getEventConsumer(List<EventHandler> handlers, List<EventSource> sources, Timer timer) {
-        return new EventConsumerImpl(handlers, sources, timer);
-    }
-
-    @Bean
     @Qualifier("fraudAndLimitJoinForWithdraw")
     public JoinManager getfraudAndLimitJoinForWithdraw(@Qualifier("withdrawDebitJoinEventHandlers") EventHandler[] withdrawDebitEventHandlers) {
         return new JoinManagerImpl(withdrawDebitEventHandlers, new RedisJoinStateRepository(new Jedis(_redisStateHostname), 300),

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Random;
 import java.util.UUID;
 
 public class FraudAnalysisEventHandler implements EventHandler {
@@ -16,6 +17,7 @@ public class FraudAnalysisEventHandler implements EventHandler {
     private final Logger _logger = LoggerFactory.getLogger(FraudAnalysisEventHandler.class);
     private final FraudAnalysisNotifier _fraudAnalysisNotifier;
     private final ObjectMapper _mapper = new ObjectMapper();
+    private final Random _rnd = new Random();
 
     public FraudAnalysisEventHandler(FraudAnalysisNotifier fraudAnalysisNotifier) {
         _fraudAnalysisNotifier = fraudAnalysisNotifier;
@@ -41,6 +43,11 @@ public class FraudAnalysisEventHandler implements EventHandler {
         Withdraw withdraw = _mapper.convertValue(event.getPayload(), Withdraw.class);
         if(withdraw != null) {
             _logger.info("Analysing fraud for operation '{}'...", event.getCorrelationId());
+            try {
+                Thread.sleep(_rnd.nextInt(100));    // simulating some delay in the process
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             // simulate some analysis (10% are fraud)
             String analysisResult = UUID.randomUUID().hashCode() % 10 == 0 ? "nok" : "ok";
             FraudAnalysisResult result = new FraudAnalysisResult(event.getCorrelationId(), withdraw.getAccountFrom(), analysisResult);
