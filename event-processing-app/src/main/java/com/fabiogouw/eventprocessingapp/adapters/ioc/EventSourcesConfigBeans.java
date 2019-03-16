@@ -1,6 +1,8 @@
 package com.fabiogouw.eventprocessingapp.adapters.ioc;
 
 import com.fabiogouw.adapters.DefaultJoinEventHandler;
+import com.fabiogouw.eventprocessingapp.adapters.dtos.FraudAnalysisResult;
+import com.fabiogouw.eventprocessingapp.adapters.dtos.LimitAnalysisResult;
 import com.fabiogouw.eventprocessingapp.adapters.handlers.FraudAnalysisEventHandler;
 import com.fabiogouw.eventprocessingapp.adapters.handlers.LimitAnalysisEventHandler;
 import com.fabiogouw.eventprocessingapp.adapters.sources.FraudAnalysisEventSource;
@@ -37,10 +39,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 @EnableKafka
 @Configuration
@@ -106,13 +105,13 @@ public class EventSourcesConfigBeans {
     @Bean
     @Qualifier("withdrawDebitJoinEventHandlers")
     public EventHandler getWithdrawFraudAnalysisEventHandlerForDebitJoin(@Qualifier("fraudAndLimitJoinForWithdraw") JoinNotifier joinNotifier) {
-        return new DefaultJoinEventHandler(joinNotifier, "com.fabiogouw.eventprocessingdemo.FraudAnalysisResult", 1, 1);
+        return new DefaultJoinEventHandler(joinNotifier, FraudAnalysisResult.EVENT_TYPE, 1, 1);
     }
 
     @Bean
     @Qualifier("withdrawDebitJoinEventHandlers")
     public EventHandler getWithdrawLimitAnalysisEventHandlerForDebitJoin(@Qualifier("fraudAndLimitJoinForWithdraw") JoinNotifier joinNotifier) {
-        return new DefaultJoinEventHandler(joinNotifier, "com.fabiogouw.eventprocessingdemo.LimitAnalysisResult", 1, 1);
+        return new DefaultJoinEventHandler(joinNotifier, LimitAnalysisResult.EVENT_TYPE, 1, 1);
     }
 
     @Bean

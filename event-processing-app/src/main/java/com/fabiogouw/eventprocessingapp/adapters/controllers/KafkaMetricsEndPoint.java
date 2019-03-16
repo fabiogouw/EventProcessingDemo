@@ -56,7 +56,7 @@ public class KafkaMetricsEndPoint {
     }
 
     private Map<String, Map<String, String>> getKafkaTemplateMetrics() {
-        Map<String, Map<String, String>> allMetrics = new HashMap<>();
+        Map<String, Map<String, String>> allMetrics = new LinkedHashMap<>();
         int i = 0;
         for (KafkaTemplate<?,  ?> template :_templates) {
             Map<String, String> metrics = new HashMap<>();
@@ -70,7 +70,7 @@ public class KafkaMetricsEndPoint {
     }
 
     private Map<String, Map<String, String>> getMessageListenerContainerMetrics() {
-        Map<String, Map<String, String>> allMetrics = new HashMap<>();
+        Map<String, Map<String, String>> allMetrics = new LinkedHashMap<>();
         Collection<MessageListenerContainer> containers = _kafkaListenerEndpointRegistry.getListenerContainers();
         for(MessageListenerContainer container : containers) {
             String id = container.getContainerProperties().getGroupId();
