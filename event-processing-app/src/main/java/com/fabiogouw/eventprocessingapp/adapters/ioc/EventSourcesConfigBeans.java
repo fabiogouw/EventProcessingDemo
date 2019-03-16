@@ -10,9 +10,11 @@ import com.fabiogouw.eventprocessingapp.ports.FraudAnalysisNotifier;
 import com.fabiogouw.eventprocessingapp.ports.LimitAnalysisNotifier;
 import com.fabiogouw.eventprocessinglib.adapters.services.EventConsumerImpl;
 import com.fabiogouw.eventprocessinglib.adapters.services.IgnoreMessageErrorHandler;
+import com.fabiogouw.eventprocessinglib.adapters.services.MicrometerEventHandlerMetricImpl;
 import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
 import com.fabiogouw.eventprocessinglib.ports.EventConsumer;
 import com.fabiogouw.eventprocessinglib.ports.EventHandler;
+import com.fabiogouw.eventprocessinglib.ports.EventHandlerMetric;
 import com.fabiogouw.eventprocessinglib.ports.EventSource;
 import com.fabiogouw.ports.JoinNotifier;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -63,6 +65,7 @@ public class EventSourcesConfigBeans {
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
         ConcurrentKafkaListenerContainerFactory<String, CustomEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setAutoStartup(false);
+        factory.setConcurrency(11);
         factory.setConsumerFactory(new DefaultKafkaConsumerFactory<>(props));
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         factory.getContainerProperties().setSyncCommits(true);
@@ -123,12 +126,12 @@ public class EventSourcesConfigBeans {
     }
 
     @Bean
-    public Map<String, Timer> getEventMetrics() {
-        return new ConcurrentHashMap<>();
+    public EventHandlerMetric getEventHandlerMetric(Function<String, Timer> timerFactory) {
+        return new MicrometerEventHandlerMetricImpl(timerFactory);
     }
 
     @Bean
-    public EventConsumer getEventConsumer(List<EventHandler> handlers, List<EventSource> sources, Function<String, Timer> timerFactory,  Map<String, Timer> eventMetrics) {
-        return new EventConsumerImpl(handlers, sources, timerFactory, eventMetrics);
+    public EventConsumer getEventConsumer(List<EventHandler> handlers, List<EventSource> sources, EventHandlerMetric metrics) {
+        return new EventConsumerImpl(handlers, sources, metrics);
     }
 }

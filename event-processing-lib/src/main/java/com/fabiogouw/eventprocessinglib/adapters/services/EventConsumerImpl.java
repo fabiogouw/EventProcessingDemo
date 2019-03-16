@@ -3,14 +3,12 @@ package com.fabiogouw.eventprocessinglib.adapters.services;
 import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
 import com.fabiogouw.eventprocessinglib.ports.EventConsumer;
 import com.fabiogouw.eventprocessinglib.ports.EventHandler;
+import com.fabiogouw.eventprocessinglib.ports.EventHandlerMetric;
 import com.fabiogouw.eventprocessinglib.ports.EventSource;
-import io.micrometer.core.instrument.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 
 public class EventConsumerImpl implements EventConsumer {
 
@@ -18,22 +16,18 @@ public class EventConsumerImpl implements EventConsumer {
 
     private final List<EventHandler> _handlers;
     private final List<EventSource> _sources;
-    private final Function<String, Timer> _timerFactory;
-    private final Map<String, Timer> _eventMetrics;
+    private final EventHandlerMetric _metrics;
 
     public EventConsumerImpl(List<EventHandler> handlers,
                              List<EventSource> sources,
-                             Function<String, Timer> timerFactory,
-                             Map<String, Timer> eventMetrics) {
+                             EventHandlerMetric metrics) {
         _handlers = handlers;
         _sources = sources;
-        _timerFactory = timerFactory;
-        _eventMetrics = eventMetrics;
+        _metrics = metrics;
     }
 
     public void consume(CustomEvent event) {
-        Timer timer = getTimerForMetrics(event.getType());
-        timer.record(() -> {
+        _metrics.record(event.getType(), event.getVersion(), (s) -> {
             boolean processed = false;
             for(EventHandler eventHandler : _handlers) {
                 if(eventHandler.getType().equals(event.getType())
@@ -49,12 +43,7 @@ public class EventConsumerImpl implements EventConsumer {
         });
     }
 
-    private Timer getTimerForMetrics(String eventType) {
-        if(!_eventMetrics.containsKey(eventType)) {
-            _eventMetrics.put(eventType, _timerFactory.apply(eventType));
-        }
-        return _eventMetrics.get(eventType);
-    }
+
 
     @Override
     public void start() {
