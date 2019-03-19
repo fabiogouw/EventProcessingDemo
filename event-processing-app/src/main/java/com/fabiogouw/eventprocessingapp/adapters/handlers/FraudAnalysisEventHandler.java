@@ -25,7 +25,7 @@ public class FraudAnalysisEventHandler implements EventHandler {
 
     @Override
     public String getType() {
-        return Withdraw.EVENT_TYPE;
+        return "com.fabiogouw.eventprocessingdemo.WithdrawRequested";
     }
 
     @Override

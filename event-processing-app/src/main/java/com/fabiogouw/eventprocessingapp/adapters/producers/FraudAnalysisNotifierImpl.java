@@ -1,7 +1,6 @@
 package com.fabiogouw.eventprocessingapp.adapters.producers;
 
 import com.fabiogouw.eventprocessingapp.adapters.dtos.FraudAnalysisResult;
-import com.fabiogouw.eventprocessingapp.adapters.dtos.Withdraw;
 import com.fabiogouw.eventprocessingapp.ports.FraudAnalysisNotifier;
 import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
 import org.slf4j.Logger;
@@ -24,11 +23,13 @@ public class FraudAnalysisNotifierImpl implements FraudAnalysisNotifier {
 
     @Override
     public void notifyResult(FraudAnalysisResult result) {
-        Message<CustomEvent> message = MessageBuilder
-                .withPayload(new CustomEvent(result.getCorrelationId(), FraudAnalysisResult.EVENT_TYPE, 1, result))
+        Message<FraudAnalysisResult> message = MessageBuilder
+                .withPayload(result)
                 .setHeader(KafkaHeaders.TOPIC, TOPIC)
                 .setHeader(KafkaHeaders.MESSAGE_KEY, result.getCorrelationId())
-                .setHeader("event_type", FraudAnalysisResult.EVENT_TYPE)
+                .setHeader(CustomEvent.CORRELATION_ID, result.getCorrelationId())
+                .setHeader(CustomEvent.EVENT_TYPE, "com.fabiogouw.eventprocessingdemo.FraudAnalysisResult")
+                .setHeader(CustomEvent.EVENT_TYPE_VERSION, 1)
                 .build();
         _logger.info(String.format("#### -> Producing message -> %s", message));
         _kafkaTemplate.send(message);

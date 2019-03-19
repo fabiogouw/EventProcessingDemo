@@ -1,0 +1,11 @@
+{
+     "type": "record",
+     "namespace": "com.fabiogouw.eventprocessingapp.adapters.dtos",
+     "name": "FraudAnalysisResult",
+     "version": "1",
+     "fields": [
+       { "name": "correlationId", "type": "string", "doc": "Id of the whole operation." },
+       { "name": "accountFrom", "type": "string", "doc": "Id of the account we will analyse." },
+       { "name": "result", "type": "string", "doc": "Result of the fraud analysis process." }
+     ]
+}

@@ -23,11 +23,13 @@ public class WithdrawNotifierImpl implements WithdrawNotifier {
 
     @Override
     public void notifyWithdraw(Withdraw withdraw) {
-        Message<CustomEvent> message = MessageBuilder
-                .withPayload(new CustomEvent(withdraw.getCorrelationId(), "com.fabiogouw.eventprocessingdemo.WithdrawRequested", 1, withdraw))
+        Message<Withdraw> message = MessageBuilder
+                .withPayload(withdraw)
                 .setHeader(KafkaHeaders.TOPIC, TOPIC)
                 .setHeader(KafkaHeaders.MESSAGE_KEY, withdraw.getCorrelationId())
-                .setHeader("event_type", "com.fabiogouw.eventprocessingdemo.WithdrawRequested")
+                .setHeader(CustomEvent.CORRELATION_ID, withdraw.getCorrelationId())
+                .setHeader(CustomEvent.EVENT_TYPE, "com.fabiogouw.eventprocessingdemo.WithdrawRequested")
+                .setHeader(CustomEvent.EVENT_TYPE_VERSION, 1)
                 .build();
         _logger.info(String.format("#### -> Producing message -> %s", message));
         _kafkaTemplate.send(message);

@@ -1,5 +1,6 @@
 package com.fabiogouw.eventprocessingapp.adapters.sources;
 
+import com.fabiogouw.eventprocessingapp.adapters.dtos.FraudAnalysisResult;
 import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.messaging.handler.annotation.Header;
 
 public class FraudAnalysisEventSource extends SpringKafkaEventSource {
 
@@ -23,9 +25,13 @@ public class FraudAnalysisEventSource extends SpringKafkaEventSource {
     }
 
     @KafkaListener(id = LISTENER_ID, topics = {"fraud"}, containerFactory = "containerFactory")
-    public void listen(ConsumerRecord<String, CustomEvent> message, Acknowledgment acknowledgment) {
+    public void listen(ConsumerRecord<String, FraudAnalysisResult> message,
+                       @Header(CustomEvent.CORRELATION_ID) String correlationId,
+                       @Header(CustomEvent.EVENT_TYPE) String eventType,
+                       @Header(CustomEvent.EVENT_TYPE_VERSION) Integer eventTypeVersion,
+                       Acknowledgment acknowledgment) {
         _logger.info("#### -> Consumed message -> '{}' : '{}' / '{}'", message.topic(),  message.partition(), message.offset());
-        CustomEvent event = message.value();
+        CustomEvent event = new CustomEvent(correlationId, eventType, eventTypeVersion, () -> message.value());
         run(event);
         acknowledgment.acknowledge();
     }

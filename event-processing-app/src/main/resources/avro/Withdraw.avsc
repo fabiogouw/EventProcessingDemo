@@ -1,0 +1,11 @@
+{
+     "type": "record",
+     "namespace": "com.fabiogouw.eventprocessingapp.adapters.dtos",
+     "name": "Withdraw",
+     "version": "1",
+     "fields": [
+       { "name": "correlationId", "type": "string", "doc": "Id of the whole operation." },
+       { "name": "accountFrom", "type": "string", "doc": "Id of the account we will make a debit." },
+       { "name": "amount", "type": "double", "doc": "Money to be withdrawn." }
+     ]
+}

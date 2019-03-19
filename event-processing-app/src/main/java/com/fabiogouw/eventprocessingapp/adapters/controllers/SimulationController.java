@@ -30,7 +30,13 @@ public class SimulationController {
     public void sendMessageToKafkaTopic(@RequestParam("count") int count) {
         Random rnd = new Random();
         for(int i = 0; i < count; i++) {
-            _withdrawNotifier.notifyWithdraw(new Withdraw(UUID.randomUUID().toString(), "CCC", rnd.nextInt(5999) + 1));
+
+            Withdraw withdraw = Withdraw.newBuilder()
+                    .setCorrelationId(UUID.randomUUID().toString())
+                    .setAccountFrom("CCC")
+                    .setAmount(rnd.nextInt(5999) + 1).build();
+
+            _withdrawNotifier.notifyWithdraw(withdraw);
         }
     }
 }

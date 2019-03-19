@@ -23,11 +23,13 @@ public class LimitAnalysisNotifierImpl implements LimitAnalysisNotifier {
 
     @Override
     public void notifyResult(LimitAnalysisResult result) {
-        Message<CustomEvent> message = MessageBuilder
-                .withPayload(new CustomEvent(result.getCorrelationId(), LimitAnalysisResult.EVENT_TYPE, 1, result))
+        Message<LimitAnalysisResult> message = MessageBuilder
+                .withPayload(result)
                 .setHeader(KafkaHeaders.TOPIC, TOPIC)
                 .setHeader(KafkaHeaders.MESSAGE_KEY, result.getCorrelationId())
-                .setHeader("event_type",  LimitAnalysisResult.EVENT_TYPE)
+                .setHeader(CustomEvent.CORRELATION_ID, result.getCorrelationId())
+                .setHeader(CustomEvent.EVENT_TYPE, "com.fabiogouw.eventprocessingdemo.LimitAnalysisResult")
+                .setHeader(CustomEvent.EVENT_TYPE_VERSION, 1)
                 .build();
         _logger.info(String.format("#### -> Producing message -> %s", message));
         _kafkaTemplate.send(message);

@@ -6,6 +6,9 @@ import com.fabiogouw.eventprocessingapp.adapters.producers.FraudAnalysisNotifier
 import com.fabiogouw.eventprocessingapp.adapters.producers.LimitAnalysisNotifierImpl;
 import com.fabiogouw.eventprocessingapp.adapters.producers.WithdrawNotifierImpl;
 import com.fabiogouw.eventprocessingapp.ports.*;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,8 +17,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.support.serializer.JsonSerializer;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +26,9 @@ public class NotifierBeans {
 
     @Value(value = "${spring.kafka.producer.bootstrap-servers}")
     private String _bootstrapAddress;
+
+    @Value(value = "${spring.kafka.schema-registry}")
+    private String _schemaRegistryAddress;
 
     @Bean
     public KafkaTemplate<String, Withdraw> createWithdrawTemplate() {
@@ -66,7 +70,9 @@ public class NotifierBeans {
         props.put(ProducerConfig.LINGER_MS_CONFIG, 1);
         props.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 33554432);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
+        props.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true);
+        props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, _schemaRegistryAddress);
         return props;
     }
 

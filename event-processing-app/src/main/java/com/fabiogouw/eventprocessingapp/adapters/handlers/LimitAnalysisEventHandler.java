@@ -21,7 +21,7 @@ public class LimitAnalysisEventHandler implements EventHandler {
 
     @Override
     public String getType() {
-        return Withdraw.EVENT_TYPE;
+        return "com.fabiogouw.eventprocessingdemo.WithdrawRequested";
     }
 
     @Override
@@ -40,7 +40,7 @@ public class LimitAnalysisEventHandler implements EventHandler {
         if(withdraw != null) {
             _logger.info("Analysing limit for operation '{}'...", event.getCorrelationId());
             String analysisResult = withdraw.getAmount() > 5000 ? "nok" : "ok";
-            LimitAnalysisResult result = new LimitAnalysisResult(event.getCorrelationId(), withdraw.getAccountFrom(), withdraw.getAmount(), analysisResult);
+            LimitAnalysisResult result = new LimitAnalysisResult(withdraw.getCorrelationId().toString(), withdraw.getAccountFrom().toString(), withdraw.getAmount(), analysisResult);
             _limitAnalysisNotifier.notifyResult(result);
         }
     }

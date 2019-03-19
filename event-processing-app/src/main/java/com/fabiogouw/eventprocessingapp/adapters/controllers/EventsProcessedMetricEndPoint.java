@@ -1,16 +1,13 @@
 package com.fabiogouw.eventprocessingapp.adapters.controllers;
 
 import com.fabiogouw.eventprocessinglib.ports.EventHandlerMetric;
-import io.micrometer.core.instrument.Timer;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.annotation.Selector;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @Component
 @Endpoint(id="events-processed")

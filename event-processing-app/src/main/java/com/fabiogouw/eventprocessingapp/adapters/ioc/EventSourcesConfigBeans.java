@@ -3,6 +3,7 @@ package com.fabiogouw.eventprocessingapp.adapters.ioc;
 import com.fabiogouw.adapters.DefaultJoinEventHandler;
 import com.fabiogouw.eventprocessingapp.adapters.dtos.FraudAnalysisResult;
 import com.fabiogouw.eventprocessingapp.adapters.dtos.LimitAnalysisResult;
+import com.fabiogouw.eventprocessingapp.adapters.dtos.Withdraw;
 import com.fabiogouw.eventprocessingapp.adapters.handlers.FraudAnalysisEventHandler;
 import com.fabiogouw.eventprocessingapp.adapters.handlers.LimitAnalysisEventHandler;
 import com.fabiogouw.eventprocessingapp.adapters.sources.FraudAnalysisEventSource;
@@ -19,6 +20,9 @@ import com.fabiogouw.eventprocessinglib.ports.EventHandler;
 import com.fabiogouw.eventprocessinglib.ports.EventHandlerMetric;
 import com.fabiogouw.eventprocessinglib.ports.EventSource;
 import com.fabiogouw.ports.JoinNotifier;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
@@ -46,23 +50,51 @@ import java.util.function.Function;
 public class EventSourcesConfigBeans {
 
     @Value(value = "${spring.kafka.consumer.bootstrap-servers}")
-    private String bootstrapAddress;
+    private String _bootstrapAddress;
 
     @Value(value = "${spring.kafka.consumer.group-id}")
-    private String groupId;
+    private String _groupId;
+
+    @Value(value = "${spring.kafka.schema-registry}")
+    private String _schemaRegistryAddress;
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, CustomEvent> containerFactory() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, _bootstrapAddress);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, _groupId);
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
         props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, 100);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+        props.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true);
+        props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, _schemaRegistryAddress);
         ConcurrentKafkaListenerContainerFactory<String, CustomEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setAutoStartup(false);
+        factory.setConcurrency(11);
+        factory.setConsumerFactory(new DefaultKafkaConsumerFactory<>(props));
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        factory.getContainerProperties().setSyncCommits(true);
+        factory.setErrorHandler(new IgnoreMessageErrorHandler());
+        return factory;
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, Withdraw> withdrawContainerFactory() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, _bootstrapAddress);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, _groupId);
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, 100);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+        props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+        props.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true);
+        props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, _schemaRegistryAddress);
+        ConcurrentKafkaListenerContainerFactory<String, Withdraw> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setAutoStartup(false);
         factory.setConcurrency(11);
         factory.setConsumerFactory(new DefaultKafkaConsumerFactory<>(props));
@@ -105,13 +137,13 @@ public class EventSourcesConfigBeans {
     @Bean
     @Qualifier("withdrawDebitJoinEventHandlers")
     public EventHandler getWithdrawFraudAnalysisEventHandlerForDebitJoin(@Qualifier("fraudAndLimitJoinForWithdraw") JoinNotifier joinNotifier) {
-        return new DefaultJoinEventHandler(joinNotifier, FraudAnalysisResult.EVENT_TYPE, 1, 1);
+        return new DefaultJoinEventHandler(joinNotifier, "com.fabiogouw.eventprocessingdemo.FraudAnalysisResult", 1, 1);
     }
 
     @Bean
     @Qualifier("withdrawDebitJoinEventHandlers")
     public EventHandler getWithdrawLimitAnalysisEventHandlerForDebitJoin(@Qualifier("fraudAndLimitJoinForWithdraw") JoinNotifier joinNotifier) {
-        return new DefaultJoinEventHandler(joinNotifier, LimitAnalysisResult.EVENT_TYPE, 1, 1);
+        return new DefaultJoinEventHandler(joinNotifier, "com.fabiogouw.eventprocessingdemo.LimitAnalysisResult", 1, 1);
     }
 
     @Bean
