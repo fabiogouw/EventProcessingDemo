@@ -31,11 +31,7 @@ public class SimulationController {
         Random rnd = new Random();
         for(int i = 0; i < count; i++) {
 
-            Withdraw withdraw = Withdraw.newBuilder()
-                    .setCorrelationId(UUID.randomUUID().toString())
-                    .setAccountFrom("CCC")
-                    .setAmount(rnd.nextInt(5999) + 1).build();
-
+            Withdraw withdraw = new Withdraw(UUID.randomUUID().toString(), "", rnd.nextInt(5999) + 1);
             _withdrawNotifier.notifyWithdraw(withdraw);
         }
     }
