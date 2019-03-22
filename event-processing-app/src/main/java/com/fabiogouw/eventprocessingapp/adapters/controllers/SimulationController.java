@@ -21,8 +21,7 @@ public class SimulationController {
 
     private final WithdrawNotifier _withdrawNotifier;
 
-    @Autowired
-    SimulationController(WithdrawNotifier withdrawNotifier) {
+    public SimulationController(WithdrawNotifier withdrawNotifier) {
         _withdrawNotifier = withdrawNotifier;
     }
 

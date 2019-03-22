@@ -8,6 +8,7 @@ import com.fabiogouw.eventprocessingapp.adapters.handlers.FraudAnalysisEventHand
 import com.fabiogouw.eventprocessingapp.adapters.handlers.LimitAnalysisEventHandler;
 import com.fabiogouw.eventprocessingapp.adapters.sources.FraudAnalysisEventSource;
 import com.fabiogouw.eventprocessingapp.adapters.sources.LimitAnalysisEventSource;
+import com.fabiogouw.eventprocessingapp.adapters.sources.WebEventSource;
 import com.fabiogouw.eventprocessingapp.adapters.sources.WithdrawEventSource;
 import com.fabiogouw.eventprocessingapp.ports.FraudAnalysisNotifier;
 import com.fabiogouw.eventprocessingapp.ports.LimitAnalysisNotifier;
@@ -102,6 +103,12 @@ public class EventSourcesConfigBeans {
         factory.getContainerProperties().setSyncCommits(true);
         factory.setErrorHandler(new IgnoreMessageErrorHandler());
         return factory;
+    }
+
+    @Bean
+    @Qualifier("WebWithdraw")
+    public WebEventSource<Withdraw> getWithdrawWebEventSource() {
+        return new WebEventSource<Withdraw>();
     }
 
     @Bean
