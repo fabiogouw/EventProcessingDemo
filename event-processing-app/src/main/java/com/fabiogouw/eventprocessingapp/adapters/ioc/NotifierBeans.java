@@ -83,8 +83,8 @@ public class NotifierBeans {
     }
 
     @Bean
-    public WithdrawNotifier getWithdrawNotifier(KafkaTemplate<String, Withdraw> kafkaTemplate) {
-        return new WithdrawNotifierImpl(kafkaTemplate);
+    public WithdrawNotifier getWithdrawNotifier(KafkaTemplate<String, Withdraw> kafkaTemplate, Holder<Withdraw> holder) {
+        return new WithdrawNotifierImpl(kafkaTemplate, holder);
     }
 
     @Bean

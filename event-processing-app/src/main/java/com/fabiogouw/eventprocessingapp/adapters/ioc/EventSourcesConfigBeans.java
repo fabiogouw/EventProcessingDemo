@@ -135,8 +135,8 @@ public class EventSourcesConfigBeans {
 
     @Bean
     @Qualifier("Withdraw")
-    public EventHandler getWithdrawEventHandler(WithdrawNotifier withdrawNotifier, Holder<Withdraw> holder) {
-        return new WithdrawRequestEventHandler(withdrawNotifier, holder);
+    public EventHandler getWithdrawEventHandler(WithdrawNotifier withdrawNotifier) {
+        return new WithdrawRequestEventHandler(withdrawNotifier);
     }
 
     @Bean

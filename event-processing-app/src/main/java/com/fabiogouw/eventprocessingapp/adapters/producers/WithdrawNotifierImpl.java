@@ -1,6 +1,7 @@
 package com.fabiogouw.eventprocessingapp.adapters.producers;
 
 import com.fabiogouw.eventprocessingapp.adapters.dtos.Withdraw;
+import com.fabiogouw.eventprocessingapp.ports.Holder;
 import com.fabiogouw.eventprocessingapp.ports.WithdrawNotifier;
 import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
 import org.slf4j.Logger;
@@ -14,11 +15,14 @@ public class WithdrawNotifierImpl implements WithdrawNotifier {
 
     private static final Logger _logger = LoggerFactory.getLogger(WithdrawNotifierImpl.class);
     private static final String TOPIC = "withdraws";
+    private final Holder<Withdraw> _holder;
 
-    private KafkaTemplate<String, Withdraw> _kafkaTemplate;
+    private final KafkaTemplate<String, Withdraw> _kafkaTemplate;
 
-    public WithdrawNotifierImpl(KafkaTemplate<String, Withdraw> kafkaTemplate) {
+    public WithdrawNotifierImpl(KafkaTemplate<String, Withdraw> kafkaTemplate,
+            Holder<Withdraw> holder) {
         _kafkaTemplate = kafkaTemplate;
+        _holder = holder;
     }
 
     @Override
@@ -33,5 +37,6 @@ public class WithdrawNotifierImpl implements WithdrawNotifier {
                 .build();
         _logger.info(String.format("#### -> Producing message -> %s", message));
         _kafkaTemplate.send(message);
+        _holder.release(withdraw.getCorrelationId(), withdraw);
     }
 }

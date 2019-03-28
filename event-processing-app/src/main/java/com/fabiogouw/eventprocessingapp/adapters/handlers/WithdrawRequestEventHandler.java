@@ -16,12 +16,11 @@ public class WithdrawRequestEventHandler implements EventHandler {
 
     private final Logger _logger = LoggerFactory.getLogger(WithdrawRequestEventHandler.class);
     private final WithdrawNotifier _withdrawNotifier;
-    private final Holder<Withdraw> _holder;
+
     private final ObjectMapper _mapper = new ObjectMapper();
 
-    public WithdrawRequestEventHandler(WithdrawNotifier withdrawNotifier, Holder<Withdraw> holder) {
+    public WithdrawRequestEventHandler(WithdrawNotifier withdrawNotifier) {
         _withdrawNotifier = withdrawNotifier;
-        _holder = holder;
     }
 
     @Override
@@ -45,7 +44,6 @@ public class WithdrawRequestEventHandler implements EventHandler {
         if(withdraw != null && withdraw.getAmount() > 0) {
             _logger.info("Producing withdraw '{}'...", event.getCorrelationId());
             _withdrawNotifier.notifyWithdraw(withdraw);
-            _holder.release(withdraw.getCorrelationId(), withdraw);
         }
         else {
             _logger.warn("Invalid withdraw: {}", withdraw);
