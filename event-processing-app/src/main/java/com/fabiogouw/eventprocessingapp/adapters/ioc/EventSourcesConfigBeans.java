@@ -1,17 +1,21 @@
 package com.fabiogouw.eventprocessingapp.adapters.ioc;
 
 import com.fabiogouw.adapters.DefaultJoinEventHandler;
+import com.fabiogouw.eventprocessingapp.adapters.controllers.AsyncHolderImpl;
 import com.fabiogouw.eventprocessingapp.adapters.dtos.FraudAnalysisResult;
 import com.fabiogouw.eventprocessingapp.adapters.dtos.LimitAnalysisResult;
 import com.fabiogouw.eventprocessingapp.adapters.dtos.Withdraw;
 import com.fabiogouw.eventprocessingapp.adapters.handlers.FraudAnalysisEventHandler;
 import com.fabiogouw.eventprocessingapp.adapters.handlers.LimitAnalysisEventHandler;
+import com.fabiogouw.eventprocessingapp.adapters.handlers.WithdrawRequestEventHandler;
 import com.fabiogouw.eventprocessingapp.adapters.sources.FraudAnalysisEventSource;
 import com.fabiogouw.eventprocessingapp.adapters.sources.LimitAnalysisEventSource;
 import com.fabiogouw.eventprocessingapp.adapters.sources.WebEventSource;
 import com.fabiogouw.eventprocessingapp.adapters.sources.WithdrawEventSource;
 import com.fabiogouw.eventprocessingapp.ports.FraudAnalysisNotifier;
+import com.fabiogouw.eventprocessingapp.ports.Holder;
 import com.fabiogouw.eventprocessingapp.ports.LimitAnalysisNotifier;
+import com.fabiogouw.eventprocessingapp.ports.WithdrawNotifier;
 import com.fabiogouw.eventprocessinglib.adapters.services.EventConsumerImpl;
 import com.fabiogouw.eventprocessinglib.adapters.services.IgnoreMessageErrorHandler;
 import com.fabiogouw.eventprocessinglib.adapters.services.MicrometerEventHandlerMetricImpl;
@@ -130,6 +134,12 @@ public class EventSourcesConfigBeans {
     }
 
     @Bean
+    @Qualifier("Withdraw")
+    public EventHandler getWithdrawEventHandler(WithdrawNotifier withdrawNotifier, Holder<Withdraw> holder) {
+        return new WithdrawRequestEventHandler(withdrawNotifier, holder);
+    }
+
+    @Bean
     @Qualifier("WithdrawFraudAnalysis")
     public EventHandler getWithdrawFraudAnalysisEventHandler(FraudAnalysisNotifier fraudAnalysisNotifier) {
         return new FraudAnalysisEventHandler(fraudAnalysisNotifier);
@@ -171,5 +181,10 @@ public class EventSourcesConfigBeans {
     @Bean
     public EventConsumer getEventConsumer(List<EventHandler> handlers, List<EventSource> sources, EventHandlerMetric metrics) {
         return new EventConsumerImpl(handlers, sources, metrics);
+    }
+
+    @Bean
+    public Holder<Withdraw> getWithdrawHolder() {
+        return new AsyncHolderImpl<>();
     }
 }
