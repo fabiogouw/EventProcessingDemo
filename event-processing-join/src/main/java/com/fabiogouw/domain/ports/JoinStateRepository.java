@@ -1,4 +1,4 @@
-package com.fabiogouw.ports;
+package com.fabiogouw.domain.ports;
 
 import com.fabiogouw.domain.entities.Join;
 

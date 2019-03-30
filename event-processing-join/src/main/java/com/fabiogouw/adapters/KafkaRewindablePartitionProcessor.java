@@ -1,7 +1,7 @@
 package com.fabiogouw.adapters;
 
 import com.fabiogouw.domain.valueObjects.CommandState;
-import com.fabiogouw.ports.JoinManager;
+import com.fabiogouw.domain.ports.JoinManager;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;

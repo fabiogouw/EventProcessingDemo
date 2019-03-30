@@ -1,7 +1,7 @@
 package com.fabiogouw.adapters;
 
 import com.fabiogouw.domain.valueObjects.CommandState;
-import com.fabiogouw.ports.JoinNotifier;
+import com.fabiogouw.domain.ports.JoinNotifier;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 

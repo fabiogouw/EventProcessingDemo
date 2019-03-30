@@ -1,6 +1,6 @@
 package com.fabiogouw.eventprocessingapp.adapters.controllers;
 
-import com.fabiogouw.eventprocessingapp.ports.Holder;
+import com.fabiogouw.eventprocessingapp.core.ports.Holder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.request.async.DeferredResult;

@@ -1,4 +1,4 @@
-package com.fabiogouw.ports;
+package com.fabiogouw.domain.ports;
 
 public interface JoinNotifier {
     void notify(String id, String eventType, Object payload);

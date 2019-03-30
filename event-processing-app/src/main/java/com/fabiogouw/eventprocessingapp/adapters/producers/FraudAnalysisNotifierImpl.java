@@ -1,8 +1,8 @@
 package com.fabiogouw.eventprocessingapp.adapters.producers;
 
-import com.fabiogouw.eventprocessingapp.adapters.dtos.FraudAnalysisResult;
-import com.fabiogouw.eventprocessingapp.ports.FraudAnalysisNotifier;
-import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
+import com.fabiogouw.eventprocessingapp.core.dtos.FraudAnalysisResult;
+import com.fabiogouw.eventprocessingapp.core.ports.FraudAnalysisNotifier;
+import com.fabiogouw.eventprocessinglib.core.dtos.CustomEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;

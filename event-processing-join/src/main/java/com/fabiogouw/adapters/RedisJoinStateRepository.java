@@ -2,7 +2,7 @@ package com.fabiogouw.adapters;
 
 import com.fabiogouw.domain.entities.Join;
 import com.fabiogouw.domain.valueObjects.EventState;
-import com.fabiogouw.ports.JoinStateRepository;
+import com.fabiogouw.domain.ports.JoinStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;

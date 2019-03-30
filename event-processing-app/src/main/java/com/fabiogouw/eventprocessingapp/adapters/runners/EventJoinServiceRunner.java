@@ -1,16 +1,13 @@
 package com.fabiogouw.eventprocessingapp.adapters.runners;
 
-import com.fabiogouw.eventprocessingapp.adapters.dtos.Debit;
-import com.fabiogouw.eventprocessingapp.ports.DebitNotifier;
-import com.fabiogouw.ports.JoinManager;
+import com.fabiogouw.eventprocessingapp.core.dtos.Debit;
+import com.fabiogouw.eventprocessingapp.core.ports.DebitNotifier;
+import com.fabiogouw.domain.ports.JoinManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
-import java.util.UUID;
 
 @Service
 public class EventJoinServiceRunner implements CommandLineRunner {

@@ -1,10 +1,10 @@
 package com.fabiogouw.eventprocessinglib.adapters.services;
 
-import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
-import com.fabiogouw.eventprocessinglib.ports.EventConsumer;
-import com.fabiogouw.eventprocessinglib.ports.EventHandler;
-import com.fabiogouw.eventprocessinglib.ports.EventHandlerMetric;
-import com.fabiogouw.eventprocessinglib.ports.EventSource;
+import com.fabiogouw.eventprocessinglib.core.dtos.CustomEvent;
+import com.fabiogouw.eventprocessinglib.core.ports.EventConsumer;
+import com.fabiogouw.eventprocessinglib.core.ports.EventHandler;
+import com.fabiogouw.eventprocessinglib.core.ports.EventHandlerMetric;
+import com.fabiogouw.eventprocessinglib.core.ports.EventSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

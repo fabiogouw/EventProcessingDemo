@@ -1,4 +1,4 @@
-package com.fabiogouw.eventprocessingapp.ports;
+package com.fabiogouw.eventprocessingapp.core.ports;
 
 import org.springframework.web.context.request.async.DeferredResult;
 

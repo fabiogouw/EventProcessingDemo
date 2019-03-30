@@ -1,7 +1,7 @@
 package com.fabiogouw.adapters;
 
 import com.fabiogouw.domain.valueObjects.CommandState;
-import com.fabiogouw.ports.RewindableEventSource;
+import com.fabiogouw.domain.ports.RewindableEventSource;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;

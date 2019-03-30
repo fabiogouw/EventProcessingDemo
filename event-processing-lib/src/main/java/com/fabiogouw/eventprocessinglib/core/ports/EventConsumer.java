@@ -1,4 +1,4 @@
-package com.fabiogouw.eventprocessinglib.ports;
+package com.fabiogouw.eventprocessinglib.core.ports;
 
 public interface EventConsumer {
     void start();

@@ -1,7 +1,7 @@
 package com.fabiogouw.eventprocessingapp.adapters.producers;
 
-import com.fabiogouw.eventprocessingapp.adapters.dtos.Debit;
-import com.fabiogouw.eventprocessingapp.ports.DebitNotifier;
+import com.fabiogouw.eventprocessingapp.core.dtos.Debit;
+import com.fabiogouw.eventprocessingapp.core.ports.DebitNotifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

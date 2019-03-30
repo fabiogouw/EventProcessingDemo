@@ -1,7 +1,7 @@
 package com.fabiogouw.eventprocessingapp.adapters.sources;
 
-import com.fabiogouw.eventprocessingapp.adapters.dtos.Withdraw;
-import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
+import com.fabiogouw.eventprocessingapp.core.dtos.Withdraw;
+import com.fabiogouw.eventprocessinglib.core.dtos.CustomEvent;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

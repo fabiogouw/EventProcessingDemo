@@ -1,6 +1,6 @@
 package com.fabiogouw.eventprocessinglib.adapters.services;
 
-import com.fabiogouw.eventprocessinglib.ports.EventHandlerMetric;
+import com.fabiogouw.eventprocessinglib.core.ports.EventHandlerMetric;
 import io.micrometer.core.instrument.Timer;
 
 import java.util.*;

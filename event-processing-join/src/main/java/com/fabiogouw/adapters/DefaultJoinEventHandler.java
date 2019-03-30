@@ -1,8 +1,8 @@
 package com.fabiogouw.adapters;
 
-import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
-import com.fabiogouw.eventprocessinglib.ports.EventHandler;
-import com.fabiogouw.ports.JoinNotifier;
+import com.fabiogouw.eventprocessinglib.core.dtos.CustomEvent;
+import com.fabiogouw.eventprocessinglib.core.ports.EventHandler;
+import com.fabiogouw.domain.ports.JoinNotifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

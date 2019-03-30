@@ -1,12 +1,9 @@
-package com.fabiogouw.eventprocessingapp.adapters.dtos;
+package com.fabiogouw.eventprocessingapp.core.dtos;
 
-public class FraudAnalysisResult {
-
-    public static final String EVENT_TYPE = "com.fabiogouw.eventprocessingdemo.FraudAnalysisResult";
-
+public class Withdraw {
     private String _correlationId;
     private String _accountFrom;
-    private String _result;
+    private double _amount;
 
     public String getCorrelationId() {
         return _correlationId;
@@ -24,21 +21,21 @@ public class FraudAnalysisResult {
         _accountFrom = value;
     }
 
-    public String getResult() {
-        return _result;
+    public double getAmount() {
+        return _amount;
     }
 
-    public void setResult(String value) {
-        _result = value;
+    public void setAmount(double value) {
+        _amount = value;
     }
 
-    public FraudAnalysisResult() {
+    public Withdraw() {
 
     }
 
-    public FraudAnalysisResult(String correlationId, String accountFrom, String result) {
+    public Withdraw(String correlationId, String accountFrom, double amount) {
         _correlationId = correlationId;
         _accountFrom = accountFrom;
-        _result = result;
+        _amount = amount;
     }
 }

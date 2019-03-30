@@ -1,10 +1,10 @@
 package com.fabiogouw.eventprocessingapp.adapters.handlers;
 
-import com.fabiogouw.eventprocessingapp.adapters.dtos.FraudAnalysisResult;
-import com.fabiogouw.eventprocessingapp.adapters.dtos.Withdraw;
-import com.fabiogouw.eventprocessingapp.ports.FraudAnalysisNotifier;
-import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
-import com.fabiogouw.eventprocessinglib.ports.EventHandler;
+import com.fabiogouw.eventprocessingapp.core.dtos.FraudAnalysisResult;
+import com.fabiogouw.eventprocessingapp.core.dtos.Withdraw;
+import com.fabiogouw.eventprocessingapp.core.ports.FraudAnalysisNotifier;
+import com.fabiogouw.eventprocessinglib.core.dtos.CustomEvent;
+import com.fabiogouw.eventprocessinglib.core.ports.EventHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

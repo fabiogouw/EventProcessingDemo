@@ -5,13 +5,9 @@ import com.fabiogouw.adapters.KafkaJoinNotifier;
 import com.fabiogouw.adapters.KafkaRewindableEventSource;
 import com.fabiogouw.adapters.RedisJoinStateRepository;
 import com.fabiogouw.domain.valueObjects.CommandState;
-import com.fabiogouw.eventprocessinglib.adapters.services.EventConsumerImpl;
-import com.fabiogouw.eventprocessinglib.ports.EventConsumer;
-import com.fabiogouw.eventprocessinglib.ports.EventHandler;
-import com.fabiogouw.eventprocessinglib.ports.EventSource;
-import com.fabiogouw.ports.JoinManager;
-import com.fabiogouw.ports.JoinNotifier;
-import io.micrometer.core.instrument.Timer;
+import com.fabiogouw.eventprocessinglib.core.ports.EventHandler;
+import com.fabiogouw.domain.ports.JoinManager;
+import com.fabiogouw.domain.ports.JoinNotifier;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -29,7 +25,6 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 import redis.clients.jedis.Jedis;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Properties;
 
 @Configuration

@@ -1,14 +1,11 @@
 package com.fabiogouw.eventprocessingapp.adapters.ioc;
 
-import com.fabiogouw.eventprocessingapp.adapters.dtos.*;
+import com.fabiogouw.eventprocessingapp.core.dtos.*;
 import com.fabiogouw.eventprocessingapp.adapters.producers.DebitNotifierImpl;
 import com.fabiogouw.eventprocessingapp.adapters.producers.FraudAnalysisNotifierImpl;
 import com.fabiogouw.eventprocessingapp.adapters.producers.LimitAnalysisNotifierImpl;
 import com.fabiogouw.eventprocessingapp.adapters.producers.WithdrawNotifierImpl;
-import com.fabiogouw.eventprocessingapp.ports.*;
-import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
-import io.confluent.kafka.serializers.KafkaAvroSerializer;
+import com.fabiogouw.eventprocessingapp.core.ports.*;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;

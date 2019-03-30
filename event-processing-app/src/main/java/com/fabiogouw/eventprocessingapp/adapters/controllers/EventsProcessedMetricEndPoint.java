@@ -1,6 +1,6 @@
 package com.fabiogouw.eventprocessingapp.adapters.controllers;
 
-import com.fabiogouw.eventprocessinglib.ports.EventHandlerMetric;
+import com.fabiogouw.eventprocessinglib.core.ports.EventHandlerMetric;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.annotation.Selector;

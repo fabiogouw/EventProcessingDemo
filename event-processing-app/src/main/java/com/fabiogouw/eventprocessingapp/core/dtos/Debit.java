@@ -1,13 +1,9 @@
-package com.fabiogouw.eventprocessingapp.adapters.dtos;
+package com.fabiogouw.eventprocessingapp.core.dtos;
 
-public class LimitAnalysisResult {
-
-    public static final String EVENT_TYPE = "com.fabiogouw.eventprocessingdemo.LimitAnalysisResult";
-
+public class Debit {
     private String _correlationId;
     private String _accountFrom;
     private double _amount;
-    private String _result;
 
     public String getCorrelationId() {
         return _correlationId;
@@ -33,22 +29,13 @@ public class LimitAnalysisResult {
         _amount = value;
     }
 
-    public String getResult() {
-        return _result;
-    }
-
-    public void setResult(String value) {
-        _result = value;
-    }
-
-    public LimitAnalysisResult() {
+    public Debit() {
 
     }
 
-    public LimitAnalysisResult(String correlationId, String accountFrom, double amount, String result) {
+    public Debit(String correlationId, String accountFrom, double amount) {
         _correlationId = correlationId;
         _accountFrom = accountFrom;
         _amount = amount;
-        _result = result;
     }
 }

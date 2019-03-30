@@ -1,6 +1,6 @@
-package com.fabiogouw.eventprocessinglib.ports;
+package com.fabiogouw.eventprocessinglib.core.ports;
 
-import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
+import com.fabiogouw.eventprocessinglib.core.dtos.CustomEvent;
 
 public interface EventHandler {
     String getType();

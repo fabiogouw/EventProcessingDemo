@@ -1,6 +1,6 @@
 package com.fabiogouw.eventprocessingapp.adapters.runners;
 
-import com.fabiogouw.eventprocessinglib.ports.EventConsumer;
+import com.fabiogouw.eventprocessinglib.core.ports.EventConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;

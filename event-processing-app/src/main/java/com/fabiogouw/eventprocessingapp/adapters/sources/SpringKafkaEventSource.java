@@ -1,7 +1,7 @@
 package com.fabiogouw.eventprocessingapp.adapters.sources;
 
-import com.fabiogouw.eventprocessinglib.dtos.CustomEvent;
-import com.fabiogouw.eventprocessinglib.ports.EventSource;
+import com.fabiogouw.eventprocessinglib.core.dtos.CustomEvent;
+import com.fabiogouw.eventprocessinglib.core.ports.EventSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;

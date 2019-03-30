@@ -1,4 +1,4 @@
-package com.fabiogouw.eventprocessinglib.dtos;
+package com.fabiogouw.eventprocessinglib.core.dtos;
 
 import java.util.function.Supplier;
 
