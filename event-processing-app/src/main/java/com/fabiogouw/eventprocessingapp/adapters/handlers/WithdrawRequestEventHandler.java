@@ -13,10 +13,11 @@ public class WithdrawRequestEventHandler implements EventHandler {
     private final Logger _logger = LoggerFactory.getLogger(WithdrawRequestEventHandler.class);
     private final WithdrawNotifier _withdrawNotifier;
 
-    private final ObjectMapper _mapper = new ObjectMapper();
+    private final ObjectMapper _mapper;
 
-    public WithdrawRequestEventHandler(WithdrawNotifier withdrawNotifier) {
+    public WithdrawRequestEventHandler(WithdrawNotifier withdrawNotifier, ObjectMapper mapper) {
         _withdrawNotifier = withdrawNotifier;
+        _mapper = mapper;
     }
 
     @Override

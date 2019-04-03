@@ -13,10 +13,11 @@ public class LimitAnalysisEventHandler implements EventHandler {
 
     private final Logger _logger = LoggerFactory.getLogger(LimitAnalysisEventHandler.class);
     private final LimitAnalysisNotifier _limitAnalysisNotifier;
-    private final ObjectMapper _mapper = new ObjectMapper();
+    private final ObjectMapper _mapper;
 
-    public LimitAnalysisEventHandler(LimitAnalysisNotifier limitAnalysisNotifier) {
+    public LimitAnalysisEventHandler(LimitAnalysisNotifier limitAnalysisNotifier, ObjectMapper mapper) {
         _limitAnalysisNotifier = limitAnalysisNotifier;
+        _mapper = mapper;
     }
 
     @Override

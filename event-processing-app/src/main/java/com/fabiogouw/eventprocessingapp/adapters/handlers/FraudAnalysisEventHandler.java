@@ -16,11 +16,12 @@ public class FraudAnalysisEventHandler implements EventHandler {
 
     private final Logger _logger = LoggerFactory.getLogger(FraudAnalysisEventHandler.class);
     private final FraudAnalysisNotifier _fraudAnalysisNotifier;
-    private final ObjectMapper _mapper = new ObjectMapper();
+    private final ObjectMapper _mapper;
     private final Random _rnd = new Random();
 
-    public FraudAnalysisEventHandler(FraudAnalysisNotifier fraudAnalysisNotifier) {
+    public FraudAnalysisEventHandler(FraudAnalysisNotifier fraudAnalysisNotifier, ObjectMapper mapper) {
         _fraudAnalysisNotifier = fraudAnalysisNotifier;
+        _mapper = mapper;
     }
 
     @Override
