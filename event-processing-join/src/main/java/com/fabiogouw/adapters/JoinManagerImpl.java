@@ -1,11 +1,11 @@
 package com.fabiogouw.adapters;
 
 import com.fabiogouw.domain.entities.Join;
+import com.fabiogouw.domain.ports.StateControlRepository;
 import com.fabiogouw.domain.valueObjects.CommandState;
 import com.fabiogouw.domain.valueObjects.EventState;
 import com.fabiogouw.eventprocessinglib.core.ports.EventHandler;
 import com.fabiogouw.domain.ports.JoinManager;
-import com.fabiogouw.domain.ports.JoinStateRepository;
 import com.fabiogouw.domain.ports.RewindableEventSource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,8 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.persist.StateMachinePersister;
 import org.springframework.statemachine.service.StateMachineService;
+import org.springframework.statemachine.state.State;
 import org.springframework.util.ObjectUtils;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -24,7 +26,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class JoinManagerImpl implements JoinManager {
-    private final JoinStateRepository _repository;
+    private final StateControlRepository _repository;
     private final RewindableEventSource _eventSource;
     private StateMachine<String, String> _stateMachine;
     private StateMachinePersister<String, String, String> _persister;
@@ -32,7 +34,7 @@ public class JoinManagerImpl implements JoinManager {
     private final Logger _logger = LoggerFactory.getLogger(JoinManagerImpl.class);
 
     public JoinManagerImpl(StateMachine<String, String> stateMachine,
-                           JoinStateRepository repository,
+                           StateControlRepository repository,
                            RewindableEventSource eventSource,
                            StateMachinePersister<String, String, String> persister) {
         _stateMachine = stateMachine;
@@ -59,15 +61,15 @@ public class JoinManagerImpl implements JoinManager {
         }
         else {
             try {
-                StateMachine<String, String> stateMachine = getStateMachine(commandState.getId());
+                String id = "__SSM:" + commandState.getId();
+                StateMachine<String, String> stateMachine = getStateMachine(id);
+                final Collection<String> statesBefore = stateMachine.getState().getIds();
                 stateMachine.getExtendedState().getVariables().put("commandState", commandState);
                 stateMachine.sendEvent(commandState.getEventType());
-                _persister.persist(stateMachine, commandState.getId());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            if(currentStateOffset < commandState.getOffset()) {
-                _repository.setOffsetForPartition(commandState.getPartition(), commandState.getOffset());
+                _logger.debug("State machine {}: BEFORE: {} : '{}' : AFTER {}",  id, statesBefore, commandState.getEventType(), stateMachine.getState().getIds());
+                _persister.persist(stateMachine, id);
+            } catch (Exception ex) {
+                _logger.error("Error while processing state: {}", ex);
             }
             _eventSource.setProcessedOffset(commandState.getPartition(), commandState.getOffset());
         }

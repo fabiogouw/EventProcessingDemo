@@ -1,6 +1,6 @@
 package com.fabiogouw.adapters;
 
-import com.fabiogouw.domain.ports.JoinStateRepository;
+import com.fabiogouw.domain.ports.StateControlRepository;
 import com.fabiogouw.domain.valueObjects.CommandState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,10 +15,10 @@ public class RedisCommandSourcedStateMachinePersister<S, E, T> implements StateM
     private final Logger _logger = LoggerFactory.getLogger(RedisCommandSourcedStateMachinePersister.class);
 
     private final StateMachinePersister<S, E, T> _persister;
-    private final JoinStateRepository _stateRepository;
+    private final StateControlRepository _stateRepository;
 
     public RedisCommandSourcedStateMachinePersister(StateMachinePersister<S, E, T> persister,
-                                                    JoinStateRepository stateRepository) {
+                                                    StateControlRepository stateRepository) {
         _persister = persister;
         _stateRepository = stateRepository;
     }
@@ -29,13 +29,14 @@ public class RedisCommandSourcedStateMachinePersister<S, E, T> implements StateM
         final Map<Object, Object> variables = extendedState.getVariables();
         CommandState commandState = (CommandState) variables.getOrDefault("commandState", new CommandState());
         _persister.persist(stateMachine, t);
-        _stateRepository.setOffsetForPartition(commandState.getPartition(), commandState.getOffset());
-        _logger.debug("Persist {} - {}", stateMachine, commandState);
+        long currentStateOffset = _stateRepository.getOffsetForPartition(commandState.getPartition());
+        if(currentStateOffset < commandState.getOffset()) {
+            _stateRepository.setOffsetForPartition(commandState.getPartition(), commandState.getOffset());
+        }
     }
 
     @Override
     public StateMachine<S, E> restore(StateMachine<S, E> stateMachine, T t) throws Exception {
-        _logger.debug("Restore {}", stateMachine);
         return _persister.restore(stateMachine, t);
     }
 }

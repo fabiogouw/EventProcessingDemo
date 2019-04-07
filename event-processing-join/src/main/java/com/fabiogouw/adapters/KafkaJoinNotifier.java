@@ -20,4 +20,9 @@ public class KafkaJoinNotifier implements JoinNotifier {
         ProducerRecord<String, CommandState> record = new ProducerRecord<>(_topic, id, new CommandState(id, eventType, payload));
         _producer.send(record);
     }
+
+    @Override
+    public void notify(String id, String eventType) {
+        notify(id, eventType, null);
+    }
 }

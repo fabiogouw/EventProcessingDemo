@@ -1,5 +1,6 @@
 package com.fabiogouw.eventprocessingapp.adapters.handlers;
 
+import com.fabiogouw.domain.ports.JoinNotifier;
 import com.fabiogouw.eventprocessingapp.core.dtos.LimitAnalysisResult;
 import com.fabiogouw.eventprocessingapp.core.dtos.Withdraw;
 import com.fabiogouw.eventprocessingapp.core.ports.LimitAnalysisNotifier;
@@ -13,10 +14,14 @@ public class LimitAnalysisEventHandler implements EventHandler {
 
     private final Logger _logger = LoggerFactory.getLogger(LimitAnalysisEventHandler.class);
     private final LimitAnalysisNotifier _limitAnalysisNotifier;
+    private final JoinNotifier _joinNotifier;
     private final ObjectMapper _mapper;
 
-    public LimitAnalysisEventHandler(LimitAnalysisNotifier limitAnalysisNotifier, ObjectMapper mapper) {
+    public LimitAnalysisEventHandler(LimitAnalysisNotifier limitAnalysisNotifier,
+                                     JoinNotifier joinNotifier,
+                                     ObjectMapper mapper) {
         _limitAnalysisNotifier = limitAnalysisNotifier;
+        _joinNotifier = joinNotifier;
         _mapper = mapper;
     }
 
@@ -43,6 +48,7 @@ public class LimitAnalysisEventHandler implements EventHandler {
             String analysisResult = withdraw.getAmount() > 5000 ? "nok" : "ok";
             LimitAnalysisResult result = new LimitAnalysisResult(withdraw.getCorrelationId().toString(), withdraw.getAccountFrom().toString(), withdraw.getAmount(), analysisResult);
             _limitAnalysisNotifier.notifyResult(result);
+            _joinNotifier.notify(event.getCorrelationId(), "LIMIT_OK");
         }
     }
 }

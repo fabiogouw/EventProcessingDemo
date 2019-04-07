@@ -1,7 +1,7 @@
 package com.fabiogouw.eventprocessingapp.adapters.ioc;
 
 import com.fabiogouw.adapters.*;
-import com.fabiogouw.domain.ports.JoinStateRepository;
+import com.fabiogouw.domain.ports.StateControlRepository;
 import com.fabiogouw.domain.valueObjects.CommandState;
 import com.fabiogouw.domain.ports.JoinManager;
 import com.fabiogouw.domain.ports.JoinNotifier;
@@ -23,15 +23,10 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.statemachine.StateMachine;
-import org.springframework.statemachine.StateMachinePersist;
-import org.springframework.statemachine.config.StateMachineFactory;
 import org.springframework.statemachine.data.redis.*;
 import org.springframework.statemachine.persist.DefaultStateMachinePersister;
 import org.springframework.statemachine.persist.RepositoryStateMachinePersist;
 import org.springframework.statemachine.persist.StateMachinePersister;
-import org.springframework.statemachine.persist.StateMachineRuntimePersister;
-import org.springframework.statemachine.service.DefaultStateMachineService;
-import org.springframework.statemachine.service.StateMachineService;
 import redis.clients.jedis.Jedis;
 
 import java.util.Collections;
@@ -50,14 +45,14 @@ public class JoinConfigBeans {
     public JoinManager getfraudAndLimitJoinForWithdraw(StateMachine<String, String> stateMachine,
                                                        StateMachinePersister<String, String, String> persister) {
         return new JoinManagerImpl(stateMachine,
-                new RedisJoinStateRepository(new Jedis(_redisStateHostname)),
+                new RedisControlStateRepository(new Jedis(_redisStateHostname)),
                 new KafkaRewindableEventSource(createConsumer(_bootstrapAddress, "join.events")),
                 persister);
     }
 
     @Bean
     public StateMachinePersister<String, String, String> stateMachinePersist(RedisConnectionFactory connectionFactory,
-                                                                           JoinStateRepository stateRepository) {
+                                                                             StateControlRepository stateRepository) {
         RedisStateMachineContextRepository<String, String> repository = new RedisStateMachineContextRepository<>(connectionFactory);
         StateMachinePersister<String, String, String> persister = new DefaultStateMachinePersister<>(new RepositoryStateMachinePersist<>(repository));
         return new RedisCommandSourcedStateMachinePersister(persister, stateRepository);
@@ -80,8 +75,8 @@ public class JoinConfigBeans {
     }
 
     @Bean
-    public JoinStateRepository getJoinStateRepository(Jedis jedis) {
-        return new RedisJoinStateRepository(jedis);
+    public StateControlRepository getJoinStateRepository(Jedis jedis) {
+        return new RedisControlStateRepository(jedis);
     }
 
     private static Consumer<String, CommandState> createConsumer(String bootstrapAddress, String topic) {

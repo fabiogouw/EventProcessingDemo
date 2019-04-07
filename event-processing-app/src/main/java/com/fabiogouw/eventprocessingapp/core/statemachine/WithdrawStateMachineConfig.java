@@ -4,10 +4,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.EnableStateMachine;
 import org.springframework.statemachine.config.StateMachineConfigurerAdapter;
-import org.springframework.statemachine.config.builders.StateMachineConfigurationConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
-import org.springframework.statemachine.persist.StateMachineRuntimePersister;
 
 @Configuration
 @EnableStateMachine
@@ -23,6 +21,7 @@ public class WithdrawStateMachineConfig extends StateMachineConfigurerAdapter<St
                 .withStates()
                 .initial("REQUESTED")
                 .fork("VALIDATING")
+                .join("REQUIREMENTS_VALIDATED")
                 .state("VALIDATED")
                 .end("DONE")
                 .and().withStates()
@@ -40,7 +39,10 @@ public class WithdrawStateMachineConfig extends StateMachineConfigurerAdapter<St
         transitions
                 .withExternal().source("REQUESTED").target("VALIDATING").event("VALIDATE")
                 .and().withFork().source("VALIDATING").target("VALIDATING_LIMIT").target("VALIDATING_FRAUD")
-                .and().withJoin().source("LIMIT_VALIDATED").source("FRAUD_VALIDATED").target("VALIDATED")
+                .and().withExternal().source("VALIDATING_LIMIT").target("LIMIT_VALIDATED").event("LIMIT_OK")
+                .and().withExternal().source("VALIDATING_FRAUD").target("FRAUD_VALIDATED").event("FRAUD_OK")
+                .and().withJoin().source("VALIDATING").target("REQUIREMENTS_VALIDATED")
+                .and().withExternal().source("REQUIREMENTS_VALIDATED").target("VALIDATED")
                 .and().withExternal().source("VALIDATED").target("DONE").event("DEBIT");
 
     }

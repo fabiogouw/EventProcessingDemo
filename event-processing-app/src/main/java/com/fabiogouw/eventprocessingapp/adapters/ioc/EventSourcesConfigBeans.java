@@ -1,6 +1,5 @@
 package com.fabiogouw.eventprocessingapp.adapters.ioc;
 
-import com.fabiogouw.adapters.DefaultJoinEventHandler;
 import com.fabiogouw.eventprocessingapp.adapters.controllers.AsyncHolderImpl;
 import com.fabiogouw.eventprocessingapp.core.dtos.Withdraw;
 import com.fabiogouw.eventprocessingapp.adapters.handlers.FraudAnalysisEventHandler;
@@ -131,32 +130,20 @@ public class EventSourcesConfigBeans {
 
     @Bean
     @Qualifier("Withdraw")
-    public EventHandler getWithdrawEventHandler(WithdrawNotifier withdrawNotifier, ObjectMapper mapper) {
-        return new WithdrawRequestEventHandler(withdrawNotifier, mapper);
+    public EventHandler getWithdrawEventHandler(WithdrawNotifier withdrawNotifier, JoinNotifier joinNotifier, ObjectMapper mapper) {
+        return new WithdrawRequestEventHandler(withdrawNotifier, joinNotifier, mapper);
     }
 
     @Bean
     @Qualifier("WithdrawFraudAnalysis")
-    public EventHandler getWithdrawFraudAnalysisEventHandler(FraudAnalysisNotifier fraudAnalysisNotifier, ObjectMapper mapper) {
-        return new FraudAnalysisEventHandler(fraudAnalysisNotifier, mapper);
+    public EventHandler getWithdrawFraudAnalysisEventHandler(FraudAnalysisNotifier fraudAnalysisNotifier, JoinNotifier joinNotifier, ObjectMapper mapper) {
+        return new FraudAnalysisEventHandler(fraudAnalysisNotifier, joinNotifier, mapper);
     }
 
     @Bean
     @Qualifier("WithdrawLimitAnalysis")
-    public EventHandler getWithdrawLimitAnalysisEventHandler(LimitAnalysisNotifier limitAnalysisNotifier, ObjectMapper mapper) {
-        return new LimitAnalysisEventHandler(limitAnalysisNotifier, mapper);
-    }
-
-    @Bean
-    @Qualifier("withdrawDebitJoinEventHandlers")
-    public EventHandler getWithdrawFraudAnalysisEventHandlerForDebitJoin(@Qualifier("fraudAndLimitJoinForWithdraw") JoinNotifier joinNotifier) {
-        return new DefaultJoinEventHandler(joinNotifier, "com.fabiogouw.eventprocessingdemo.FraudAnalysisResult", 1, 1);
-    }
-
-    @Bean
-    @Qualifier("withdrawDebitJoinEventHandlers")
-    public EventHandler getWithdrawLimitAnalysisEventHandlerForDebitJoin(@Qualifier("fraudAndLimitJoinForWithdraw") JoinNotifier joinNotifier) {
-        return new DefaultJoinEventHandler(joinNotifier, "com.fabiogouw.eventprocessingdemo.LimitAnalysisResult", 1, 1);
+    public EventHandler getWithdrawLimitAnalysisEventHandler(LimitAnalysisNotifier limitAnalysisNotifier, JoinNotifier joinNotifier, ObjectMapper mapper) {
+        return new LimitAnalysisEventHandler(limitAnalysisNotifier, joinNotifier, mapper);
     }
 
     @Bean

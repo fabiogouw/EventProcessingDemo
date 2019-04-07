@@ -1,18 +1,18 @@
 package com.fabiogouw.adapters;
 
-import com.fabiogouw.domain.ports.JoinStateRepository;
+import com.fabiogouw.domain.ports.StateControlRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 
-public class RedisJoinStateRepository implements JoinStateRepository {
+public class RedisControlStateRepository implements StateControlRepository {
 
-    private final Logger _logger = LoggerFactory.getLogger(RedisJoinStateRepository.class);
+    private final Logger _logger = LoggerFactory.getLogger(RedisControlStateRepository.class);
 
     private static String PARTITION_PREFIX = "__PJOIN_";
     private final Jedis _jedis;
 
-    public RedisJoinStateRepository(Jedis jedis) {
+    public RedisControlStateRepository(Jedis jedis) {
         _jedis = jedis;
     }
 
