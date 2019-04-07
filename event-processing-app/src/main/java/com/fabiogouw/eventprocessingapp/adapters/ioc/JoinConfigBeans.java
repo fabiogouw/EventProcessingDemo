@@ -1,11 +1,8 @@
 package com.fabiogouw.eventprocessingapp.adapters.ioc;
 
-import com.fabiogouw.adapters.JoinManagerImpl;
-import com.fabiogouw.adapters.KafkaJoinNotifier;
-import com.fabiogouw.adapters.KafkaRewindableEventSource;
-import com.fabiogouw.adapters.RedisJoinStateRepository;
+import com.fabiogouw.adapters.*;
+import com.fabiogouw.domain.ports.JoinStateRepository;
 import com.fabiogouw.domain.valueObjects.CommandState;
-import com.fabiogouw.eventprocessinglib.core.ports.EventHandler;
 import com.fabiogouw.domain.ports.JoinManager;
 import com.fabiogouw.domain.ports.JoinNotifier;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -20,8 +17,19 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.statemachine.StateMachine;
+import org.springframework.statemachine.StateMachinePersist;
+import org.springframework.statemachine.config.StateMachineFactory;
+import org.springframework.statemachine.data.redis.*;
+import org.springframework.statemachine.persist.RepositoryStateMachinePersist;
+import org.springframework.statemachine.persist.StateMachineRuntimePersister;
+import org.springframework.statemachine.service.DefaultStateMachineService;
+import org.springframework.statemachine.service.StateMachineService;
 import redis.clients.jedis.Jedis;
 
 import java.util.Collections;
@@ -37,8 +45,9 @@ public class JoinConfigBeans {
 
     @Bean
     @Qualifier("fraudAndLimitJoinForWithdraw")
-    public JoinManager getfraudAndLimitJoinForWithdraw(@Qualifier("withdrawDebitJoinEventHandlers") EventHandler[] withdrawDebitEventHandlers) {
-        return new JoinManagerImpl(withdrawDebitEventHandlers, new RedisJoinStateRepository(new Jedis(_redisStateHostname), 300),
+    public JoinManager getfraudAndLimitJoinForWithdraw(StateMachine<String, String> stateMachine) {
+        return new JoinManagerImpl(stateMachine,
+                new RedisJoinStateRepository(new Jedis(_redisStateHostname)),
                 new KafkaRewindableEventSource(createConsumer(_bootstrapAddress, "join.events")));
     }
 
@@ -46,6 +55,36 @@ public class JoinConfigBeans {
     @Qualifier("fraudAndLimitJoinForWithdraw")
     public JoinNotifier getJoinNotifier() {
         return new KafkaJoinNotifier(createProducer(_bootstrapAddress), "join.events");
+    }
+
+    @Bean
+    public StateMachineRuntimePersister<String, String, String> stateMachineRuntimePersister(RedisStateMachineRepository jpaStateMachineRepository,
+            JoinStateRepository stateRepository,
+            Jedis jedis) {
+        return new RedisCommandSourceStateMachineInterceptor<>(new RedisPersistingStateMachineInterceptor<>(jpaStateMachineRepository),
+                stateRepository,
+                jedis);
+    }
+
+    @Bean
+    public StateMachineService<String, String> stateMachineService(StateMachineFactory<String, String> stateMachineFactory,
+            StateMachineRuntimePersister<String, String, String> stateMachineRuntimePersister) {
+        return new DefaultStateMachineService<String, String>(stateMachineFactory, stateMachineRuntimePersister);
+    }
+
+    @Bean
+    public Jedis getJedis() {
+        return new Jedis(_redisStateHostname);
+    }
+
+    @Bean
+    public RedisConnectionFactory redisConnectionFactory() {
+        return new JedisConnectionFactory(new RedisStandaloneConfiguration(_redisStateHostname));
+    }
+
+    @Bean
+    public JoinStateRepository getJoinStateRepository(Jedis jedis) {
+        return new RedisJoinStateRepository(jedis);
     }
 
     private static Consumer<String, CommandState> createConsumer(String bootstrapAddress, String topic) {

@@ -11,6 +11,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.statemachine.StateMachine;
+import org.springframework.statemachine.persist.StateMachinePersister;
+import org.springframework.statemachine.service.StateMachineService;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.Set;
@@ -20,97 +24,64 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class JoinManagerImpl implements JoinManager {
-    private List<String> _expectedStates;
-    private Consumer<Join> _onCompletion;
     private final JoinStateRepository _repository;
     private final RewindableEventSource _eventSource;
-    private Predicate<Set<EventState>> _checkJoin;
-    private final ObjectMapper _objectMapper = new ObjectMapper();
+    private StateMachine<String, String> _stateMachine;
+    private StateMachineService<String, String> _stateMachineService;
 
     private final Logger _logger = LoggerFactory.getLogger(JoinManagerImpl.class);
 
-    public JoinManagerImpl(EventHandler[] handlers, JoinStateRepository repository, RewindableEventSource eventSource) {
-        this(Stream.of(handlers).map(h -> h.getType()).collect(Collectors.toList()), repository, eventSource);
-    }
-
-    public JoinManagerImpl(List<String> expectedStates, JoinStateRepository repository, RewindableEventSource eventSource) {
-        _expectedStates = expectedStates;
+    public JoinManagerImpl(StateMachine<String, String> stateMachine, JoinStateRepository repository, RewindableEventSource eventSource) {
+        _stateMachine = stateMachine;
         _repository = repository;
         _eventSource = eventSource;
-        _checkJoin = this::checkJoin;   //we might want to change the default state validation
     }
 
-    public void setBehavior(Consumer<Join> onCompletion) {
-        _eventSource.unsubscribe();
-        _onCompletion = onCompletion;
+    public void start() {
         _eventSource.subscribe(this::addState);
-        _logger.info("Join listening to '{}'...", String.join(", ", _expectedStates));
+        _logger.info("State machine listening to ...");
     }
 
     public void stop() {
         _eventSource.unsubscribe();
     }
 
-    private void addState(CommandState commandState) {
+    private synchronized void addState(CommandState commandState) {
         long currentStateOffset = _repository.getOffsetForPartition(commandState.getPartition());
         if(currentStateOffset < commandState.getOffset() - 1) {
             _logger.warn("Something is strange. While processing the partition {}, the current offset should be {}, but it was {}.", commandState.getPartition(), commandState.getOffset() - 1, currentStateOffset);
-            long offsetToGo = currentStateOffset < 0 ? JoinManager.BEGGINING_OFFSET : currentStateOffset;
+            long offsetToGo = currentStateOffset < 0 ? -1 : currentStateOffset;
             _eventSource.rewindTo(commandState.getPartition(), offsetToGo, commandState.getOffset());
         }
         else {
-            Join join = _repository.get(commandState.getId());
-            EventState state = getEventStateObject(commandState);
-            join.addState(state);
-            if(currentStateOffset + 1 == commandState.getOffset()) {
-                boolean shouldComplete = testJoin(join.getStates());
-                if(shouldComplete) {
-                    try {
-                        _onCompletion.accept(join);
-                    }
-                    catch(Exception ex) {
-                        _logger.error("Error while processing join on partition {}, offset {}. Details: {}", commandState.getPartition(), commandState.getOffset(), ex);
-                    }
-                }
+            try {
+                StateMachine<String, String> stateMachine = getStateMachine(commandState.getId());
+                stateMachine.getExtendedState().getVariables().put("commandState", commandState);
+                stateMachine.sendEvent(commandState.getEventType());
+                _stateMachineService.releaseStateMachine(_stateMachine.getId());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
             if(currentStateOffset < commandState.getOffset()) {
-                _repository.save(join, commandState.getPartition(), commandState.getOffset());
+                _repository.setOffsetForPartition(commandState.getPartition(), commandState.getOffset());
             }
             _eventSource.setProcessedOffset(commandState.getPartition(), commandState.getOffset());
         }
     }
 
-    private boolean testJoin(Set<EventState> states) {
-        try {
-            return _checkJoin.test(states);
+    private synchronized StateMachine<String, String> getStateMachine(String machineId) throws Exception {
+        //listener.resetMessages();
+        if (_stateMachine == null) {
+            _stateMachine = _stateMachineService.acquireStateMachine(machineId);
+            //_stateMachine.addStateListener(listener);
+            _stateMachine.start();
+        } else if (!ObjectUtils.nullSafeEquals(_stateMachine.getId(), machineId)) {
+            _stateMachineService.releaseStateMachine(_stateMachine.getId());
+            _stateMachine.stop();
+            _stateMachine = _stateMachineService.acquireStateMachine(machineId);
+            //_stateMachine.addStateListener(listener);
+            _stateMachine.start();
         }
-        catch (Exception ex) {
-            _logger.error("Error while checking join: {}", ex.toString());
-            return false;
-        }
+        return _stateMachine;
     }
-
-    private EventState getEventStateObject(CommandState commandState) {
-        EventState state = null;
-        try {
-            state = new EventState(commandState.getEventType(), _objectMapper.writeValueAsString(commandState.getValue()));
-        } catch (JsonProcessingException ex) {
-            _logger.error("Error while storing event data for partition {} and {}: {}", commandState.getPartition(), commandState.getOffset(),  ex);
-        }
-        return state;
-    }
-
-    private boolean checkJoin(Set<EventState> currentEventStates) {
-        _logger.debug("Checking join: Expected: {}. Current: {}",
-                String.join(", ", _expectedStates),
-                String.join(", ", currentEventStates.stream().map(es -> es.getEvent()).collect(Collectors.toList())));
-        int expectedCount = _expectedStates.size();
-        for(EventState eventState : currentEventStates) {
-            if(_expectedStates.contains(eventState.getEvent())) {
-                expectedCount--;
-            }
-        }
-        return expectedCount == 0;
-    }
-
 }

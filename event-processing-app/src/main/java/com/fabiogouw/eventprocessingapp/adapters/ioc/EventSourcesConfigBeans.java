@@ -23,6 +23,7 @@ import com.fabiogouw.eventprocessinglib.core.ports.EventHandler;
 import com.fabiogouw.eventprocessinglib.core.ports.EventHandlerMetric;
 import com.fabiogouw.eventprocessinglib.core.ports.EventSource;
 import com.fabiogouw.domain.ports.JoinNotifier;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
@@ -130,20 +131,20 @@ public class EventSourcesConfigBeans {
 
     @Bean
     @Qualifier("Withdraw")
-    public EventHandler getWithdrawEventHandler(WithdrawNotifier withdrawNotifier) {
-        return new WithdrawRequestEventHandler(withdrawNotifier);
+    public EventHandler getWithdrawEventHandler(WithdrawNotifier withdrawNotifier, ObjectMapper mapper) {
+        return new WithdrawRequestEventHandler(withdrawNotifier, mapper);
     }
 
     @Bean
     @Qualifier("WithdrawFraudAnalysis")
-    public EventHandler getWithdrawFraudAnalysisEventHandler(FraudAnalysisNotifier fraudAnalysisNotifier) {
-        return new FraudAnalysisEventHandler(fraudAnalysisNotifier);
+    public EventHandler getWithdrawFraudAnalysisEventHandler(FraudAnalysisNotifier fraudAnalysisNotifier, ObjectMapper mapper) {
+        return new FraudAnalysisEventHandler(fraudAnalysisNotifier, mapper);
     }
 
     @Bean
     @Qualifier("WithdrawLimitAnalysis")
-    public EventHandler getWithdrawLimitAnalysisEventHandler(LimitAnalysisNotifier limitAnalysisNotifier) {
-        return new LimitAnalysisEventHandler(limitAnalysisNotifier);
+    public EventHandler getWithdrawLimitAnalysisEventHandler(LimitAnalysisNotifier limitAnalysisNotifier, ObjectMapper mapper) {
+        return new LimitAnalysisEventHandler(limitAnalysisNotifier, mapper);
     }
 
     @Bean

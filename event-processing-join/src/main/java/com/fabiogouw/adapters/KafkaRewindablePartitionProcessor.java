@@ -13,13 +13,15 @@ import java.util.function.Consumer;
 
 public class KafkaRewindablePartitionProcessor {
 
+    private static final long BEGINNING_OFFSET = -1;
+
     private final Logger _logger = LoggerFactory.getLogger(KafkaRewindablePartitionProcessor.class);
     private final org.apache.kafka.clients.consumer.Consumer<String, CommandState> _consumer;
     private final TopicPartition _partition;
     private final Consumer<CommandState> _run;
     private long _currentOffset = -1;
     private boolean _isMarkedToRewind = false;
-    private long _offsetToRewind = JoinManager.BEGGINING_OFFSET;
+    private long _offsetToRewind = BEGINNING_OFFSET;
 
     public int getPartitionId() {
         return _partition.partition();

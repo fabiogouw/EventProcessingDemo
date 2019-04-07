@@ -1,27 +1,19 @@
 package com.fabiogouw.adapters;
 
-import com.fabiogouw.domain.entities.Join;
-import com.fabiogouw.domain.valueObjects.EventState;
 import com.fabiogouw.domain.ports.JoinStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
-
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class RedisJoinStateRepository implements JoinStateRepository {
 
     private final Logger _logger = LoggerFactory.getLogger(RedisJoinStateRepository.class);
 
     private static String PARTITION_PREFIX = "__PJOIN_";
-    private static String JOIN_PREFIX = "__JOIN_";
     private final Jedis _jedis;
-    private final int _expirationInSeconds;
 
-    public RedisJoinStateRepository(Jedis jedis, int expirationInSeconds) {
+    public RedisJoinStateRepository(Jedis jedis) {
         _jedis = jedis;
-        _expirationInSeconds = expirationInSeconds;
     }
 
     @Override
@@ -36,27 +28,7 @@ public class RedisJoinStateRepository implements JoinStateRepository {
     }
 
     @Override
-    public Join get(String id) {
-        Map<String, String> states = _jedis.hgetAll(JOIN_PREFIX + id);
-        Join join = new Join(id, states.entrySet().stream()
-                .map(s -> new EventState(s.getKey(), s.getValue()))
-                .collect(Collectors.toSet()));
-        _logger.debug("Getting join info: Id: {}, States: '{}'.", join.getId(),
-                String.join(", ", join.getStates().stream().map(es -> es.getEvent()).collect(Collectors.toList())));
-        return join;
-    }
-
-    @Override
-    public void save(Join join, int partition, long offset) {
-        String key = JOIN_PREFIX + join.getId();
-        for(EventState eventState : join.getStates()) {
-            _jedis.hset(key, eventState.getEvent(), eventState.getValue());
-        }
-        _jedis.expire(key, _expirationInSeconds);
-        // last thing to do is to update the partition's offset, don't care
-        // if the last instructions will get repeated eventually
-        _logger.debug("Saving join info: Id: {}, States: '{}'.", join.getId(),
-                String.join(", ", join.getStates().stream().map(es -> es.getEvent()).collect(Collectors.toList())));
+    public void setOffsetForPartition(int partition, long offset) {
         _logger.debug("Setting offset info for partition {}: {}.", partition, offset);
         _jedis.set(PARTITION_PREFIX + partition, String.valueOf(offset));
     }
