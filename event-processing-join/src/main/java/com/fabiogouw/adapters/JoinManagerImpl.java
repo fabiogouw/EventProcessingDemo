@@ -27,14 +27,18 @@ public class JoinManagerImpl implements JoinManager {
     private final JoinStateRepository _repository;
     private final RewindableEventSource _eventSource;
     private StateMachine<String, String> _stateMachine;
-    private StateMachineService<String, String> _stateMachineService;
+    private StateMachinePersister<String, String, String> _persister;
 
     private final Logger _logger = LoggerFactory.getLogger(JoinManagerImpl.class);
 
-    public JoinManagerImpl(StateMachine<String, String> stateMachine, JoinStateRepository repository, RewindableEventSource eventSource) {
+    public JoinManagerImpl(StateMachine<String, String> stateMachine,
+                           JoinStateRepository repository,
+                           RewindableEventSource eventSource,
+                           StateMachinePersister<String, String, String> persister) {
         _stateMachine = stateMachine;
         _repository = repository;
         _eventSource = eventSource;
+        _persister = persister;
     }
 
     public void start() {
@@ -58,7 +62,7 @@ public class JoinManagerImpl implements JoinManager {
                 StateMachine<String, String> stateMachine = getStateMachine(commandState.getId());
                 stateMachine.getExtendedState().getVariables().put("commandState", commandState);
                 stateMachine.sendEvent(commandState.getEventType());
-                _stateMachineService.releaseStateMachine(_stateMachine.getId());
+                _persister.persist(stateMachine, commandState.getId());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -69,19 +73,8 @@ public class JoinManagerImpl implements JoinManager {
         }
     }
 
-    private synchronized StateMachine<String, String> getStateMachine(String machineId) throws Exception {
-        //listener.resetMessages();
-        if (_stateMachine == null) {
-            _stateMachine = _stateMachineService.acquireStateMachine(machineId);
-            //_stateMachine.addStateListener(listener);
-            _stateMachine.start();
-        } else if (!ObjectUtils.nullSafeEquals(_stateMachine.getId(), machineId)) {
-            _stateMachineService.releaseStateMachine(_stateMachine.getId());
-            _stateMachine.stop();
-            _stateMachine = _stateMachineService.acquireStateMachine(machineId);
-            //_stateMachine.addStateListener(listener);
-            _stateMachine.start();
-        }
+    private StateMachine<String, String> getStateMachine(String machineId) throws Exception {
+        _stateMachine = _persister.restore(_stateMachine, machineId);
         return _stateMachine;
     }
 }

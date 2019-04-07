@@ -13,12 +13,6 @@ import org.springframework.statemachine.persist.StateMachineRuntimePersister;
 @EnableStateMachine
 public class WithdrawStateMachineConfig extends StateMachineConfigurerAdapter<String, String> {
 
-    private final StateMachineRuntimePersister<String, String, String> _stateMachineRuntimePersister;
-
-    public WithdrawStateMachineConfig(StateMachineRuntimePersister<String, String, String> stateMachineRuntimePersister) {
-        _stateMachineRuntimePersister = stateMachineRuntimePersister;
-    }
-
     public Action<String, String> initAction() {
         return ctx -> System.out.println(ctx.getTarget().getId());
     }
@@ -50,13 +44,4 @@ public class WithdrawStateMachineConfig extends StateMachineConfigurerAdapter<St
                 .and().withExternal().source("VALIDATED").target("DONE").event("DEBIT");
 
     }
-
-    @Override
-    public void configure(StateMachineConfigurationConfigurer<String, String> config)
-            throws Exception {
-        config
-                .withPersistence()
-                .runtimePersister(_stateMachineRuntimePersister);
-    }
-
 }
