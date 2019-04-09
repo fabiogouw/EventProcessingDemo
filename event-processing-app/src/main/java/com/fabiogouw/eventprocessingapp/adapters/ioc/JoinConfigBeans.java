@@ -3,8 +3,8 @@ package com.fabiogouw.eventprocessingapp.adapters.ioc;
 import com.fabiogouw.adapters.*;
 import com.fabiogouw.domain.ports.StateControlRepository;
 import com.fabiogouw.domain.valueObjects.CommandState;
-import com.fabiogouw.domain.ports.JoinManager;
-import com.fabiogouw.domain.ports.JoinNotifier;
+import com.fabiogouw.domain.ports.ReactiveStateMachineManager;
+import com.fabiogouw.domain.ports.ReactiveStateMachineEventNotifier;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -42,9 +42,9 @@ public class JoinConfigBeans {
 
     @Bean
     @Qualifier("fraudAndLimitJoinForWithdraw")
-    public JoinManager getfraudAndLimitJoinForWithdraw(StateMachine<String, String> stateMachine,
-                                                       StateMachinePersister<String, String, String> persister) {
-        return new JoinManagerImpl(stateMachine,
+    public ReactiveStateMachineManager getfraudAndLimitJoinForWithdraw(StateMachine<String, String> stateMachine,
+                                                                       StateMachinePersister<String, String, String> persister) {
+        return new ReactiveStateMachineManagerImpl(stateMachine,
                 new RedisControlStateRepository(new Jedis(_redisStateHostname)),
                 new KafkaRewindableEventSource(createConsumer(_bootstrapAddress, "join.events")),
                 persister);
@@ -60,8 +60,8 @@ public class JoinConfigBeans {
 
     @Bean
     @Qualifier("fraudAndLimitJoinForWithdraw")
-    public JoinNotifier getJoinNotifier() {
-        return new KafkaJoinNotifier(createProducer(_bootstrapAddress), "join.events");
+    public ReactiveStateMachineEventNotifier getJoinNotifier() {
+        return new KafkaReactiveStateMachineEventNotifier(createProducer(_bootstrapAddress), "join.events");
     }
 
     @Bean

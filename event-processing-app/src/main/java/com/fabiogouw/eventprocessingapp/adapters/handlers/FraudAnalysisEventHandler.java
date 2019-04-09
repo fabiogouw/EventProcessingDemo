@@ -1,6 +1,6 @@
 package com.fabiogouw.eventprocessingapp.adapters.handlers;
 
-import com.fabiogouw.domain.ports.JoinNotifier;
+import com.fabiogouw.domain.ports.ReactiveStateMachineEventNotifier;
 import com.fabiogouw.eventprocessingapp.core.dtos.FraudAnalysisResult;
 import com.fabiogouw.eventprocessingapp.core.dtos.Withdraw;
 import com.fabiogouw.eventprocessingapp.core.ports.FraudAnalysisNotifier;
@@ -17,15 +17,15 @@ public class FraudAnalysisEventHandler implements EventHandler {
 
     private final Logger _logger = LoggerFactory.getLogger(FraudAnalysisEventHandler.class);
     private final FraudAnalysisNotifier _fraudAnalysisNotifier;
-    private final JoinNotifier _joinNotifier;
+    private final ReactiveStateMachineEventNotifier _reactiveStateMachineEventNotifier;
     private final ObjectMapper _mapper;
     private final Random _rnd = new Random();
 
     public FraudAnalysisEventHandler(FraudAnalysisNotifier fraudAnalysisNotifier,
-                                     JoinNotifier joinNotifier,
+                                     ReactiveStateMachineEventNotifier reactiveStateMachineEventNotifier,
                                      ObjectMapper mapper) {
         _fraudAnalysisNotifier = fraudAnalysisNotifier;
-        _joinNotifier = joinNotifier;
+        _reactiveStateMachineEventNotifier = reactiveStateMachineEventNotifier;
         _mapper = mapper;
     }
 
@@ -58,7 +58,7 @@ public class FraudAnalysisEventHandler implements EventHandler {
             String analysisResult = UUID.randomUUID().hashCode() % 10 == 0 ? "nok" : "ok";
             FraudAnalysisResult result = new FraudAnalysisResult(event.getCorrelationId(), withdraw.getAccountFrom(), analysisResult);
             _fraudAnalysisNotifier.notifyResult(result);
-            _joinNotifier.notify(event.getCorrelationId(), "FRAUD_OK");
+            _reactiveStateMachineEventNotifier.notify(event.getCorrelationId(), "FRAUD_OK");
         }
     }
 }

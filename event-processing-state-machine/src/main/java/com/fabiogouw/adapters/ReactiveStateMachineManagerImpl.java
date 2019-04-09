@@ -1,42 +1,28 @@
 package com.fabiogouw.adapters;
 
-import com.fabiogouw.domain.entities.Join;
 import com.fabiogouw.domain.ports.StateControlRepository;
 import com.fabiogouw.domain.valueObjects.CommandState;
-import com.fabiogouw.domain.valueObjects.EventState;
-import com.fabiogouw.eventprocessinglib.core.ports.EventHandler;
-import com.fabiogouw.domain.ports.JoinManager;
+import com.fabiogouw.domain.ports.ReactiveStateMachineManager;
 import com.fabiogouw.domain.ports.RewindableEventSource;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.persist.StateMachinePersister;
-import org.springframework.statemachine.service.StateMachineService;
-import org.springframework.statemachine.state.State;
-import org.springframework.util.ObjectUtils;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class JoinManagerImpl implements JoinManager {
+public class ReactiveStateMachineManagerImpl implements ReactiveStateMachineManager {
     private final StateControlRepository _repository;
     private final RewindableEventSource _eventSource;
     private StateMachine<String, String> _stateMachine;
     private StateMachinePersister<String, String, String> _persister;
 
-    private final Logger _logger = LoggerFactory.getLogger(JoinManagerImpl.class);
+    private final Logger _logger = LoggerFactory.getLogger(ReactiveStateMachineManagerImpl.class);
 
-    public JoinManagerImpl(StateMachine<String, String> stateMachine,
-                           StateControlRepository repository,
-                           RewindableEventSource eventSource,
-                           StateMachinePersister<String, String, String> persister) {
+    public ReactiveStateMachineManagerImpl(StateMachine<String, String> stateMachine,
+                                           StateControlRepository repository,
+                                           RewindableEventSource eventSource,
+                                           StateMachinePersister<String, String, String> persister) {
         _stateMachine = stateMachine;
         _repository = repository;
         _eventSource = eventSource;

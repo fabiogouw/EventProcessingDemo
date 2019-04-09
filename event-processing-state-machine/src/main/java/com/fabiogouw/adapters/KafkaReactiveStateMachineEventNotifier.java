@@ -1,16 +1,16 @@
 package com.fabiogouw.adapters;
 
 import com.fabiogouw.domain.valueObjects.CommandState;
-import com.fabiogouw.domain.ports.JoinNotifier;
+import com.fabiogouw.domain.ports.ReactiveStateMachineEventNotifier;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
-public class KafkaJoinNotifier implements JoinNotifier {
+public class KafkaReactiveStateMachineEventNotifier implements ReactiveStateMachineEventNotifier {
 
     private final Producer<String, CommandState> _producer;
     private final String _topic;
 
-    public KafkaJoinNotifier(Producer<String, CommandState> producer, String topic) {
+    public KafkaReactiveStateMachineEventNotifier(Producer<String, CommandState> producer, String topic) {
         _producer = producer;
         _topic = topic;
     }

@@ -1,6 +1,6 @@
 package com.fabiogouw.domain.ports;
 
-public interface JoinManager {
+public interface ReactiveStateMachineManager {
     void start();
     void stop();
 }

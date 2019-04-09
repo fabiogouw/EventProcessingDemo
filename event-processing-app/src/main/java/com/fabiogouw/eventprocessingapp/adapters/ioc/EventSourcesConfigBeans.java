@@ -21,7 +21,7 @@ import com.fabiogouw.eventprocessinglib.core.ports.EventConsumer;
 import com.fabiogouw.eventprocessinglib.core.ports.EventHandler;
 import com.fabiogouw.eventprocessinglib.core.ports.EventHandlerMetric;
 import com.fabiogouw.eventprocessinglib.core.ports.EventSource;
-import com.fabiogouw.domain.ports.JoinNotifier;
+import com.fabiogouw.domain.ports.ReactiveStateMachineEventNotifier;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
@@ -130,20 +130,20 @@ public class EventSourcesConfigBeans {
 
     @Bean
     @Qualifier("Withdraw")
-    public EventHandler getWithdrawEventHandler(WithdrawNotifier withdrawNotifier, JoinNotifier joinNotifier, ObjectMapper mapper) {
-        return new WithdrawRequestEventHandler(withdrawNotifier, joinNotifier, mapper);
+    public EventHandler getWithdrawEventHandler(WithdrawNotifier withdrawNotifier, ReactiveStateMachineEventNotifier reactiveStateMachineEventNotifier, ObjectMapper mapper) {
+        return new WithdrawRequestEventHandler(withdrawNotifier, reactiveStateMachineEventNotifier, mapper);
     }
 
     @Bean
     @Qualifier("WithdrawFraudAnalysis")
-    public EventHandler getWithdrawFraudAnalysisEventHandler(FraudAnalysisNotifier fraudAnalysisNotifier, JoinNotifier joinNotifier, ObjectMapper mapper) {
-        return new FraudAnalysisEventHandler(fraudAnalysisNotifier, joinNotifier, mapper);
+    public EventHandler getWithdrawFraudAnalysisEventHandler(FraudAnalysisNotifier fraudAnalysisNotifier, ReactiveStateMachineEventNotifier reactiveStateMachineEventNotifier, ObjectMapper mapper) {
+        return new FraudAnalysisEventHandler(fraudAnalysisNotifier, reactiveStateMachineEventNotifier, mapper);
     }
 
     @Bean
     @Qualifier("WithdrawLimitAnalysis")
-    public EventHandler getWithdrawLimitAnalysisEventHandler(LimitAnalysisNotifier limitAnalysisNotifier, JoinNotifier joinNotifier, ObjectMapper mapper) {
-        return new LimitAnalysisEventHandler(limitAnalysisNotifier, joinNotifier, mapper);
+    public EventHandler getWithdrawLimitAnalysisEventHandler(LimitAnalysisNotifier limitAnalysisNotifier, ReactiveStateMachineEventNotifier reactiveStateMachineEventNotifier, ObjectMapper mapper) {
+        return new LimitAnalysisEventHandler(limitAnalysisNotifier, reactiveStateMachineEventNotifier, mapper);
     }
 
     @Bean

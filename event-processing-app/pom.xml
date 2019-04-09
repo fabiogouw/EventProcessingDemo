@@ -95,7 +95,7 @@
         </dependency>
         <dependency>
             <groupId>com.fabiogouw</groupId>
-            <artifactId>event-processing-join</artifactId>
+            <artifactId>event-processing-state-machine</artifactId>
             <version>1.0</version>
         </dependency>
     </dependencies>
